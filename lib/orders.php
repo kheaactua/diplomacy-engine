@@ -42,7 +42,7 @@ abstract class Order {
 		return "n/a";
 	}
 	protected function generateOrder($keys, $vals) {
-		array_walk($keys, function($e) { return "/%$e%/"; });
+		array_walk($keys, function(&$e) { $e = "/%$e%/"; });
 		$str = preg_replace($keys, $vals, $this->format);
 		return $str;
 	}
