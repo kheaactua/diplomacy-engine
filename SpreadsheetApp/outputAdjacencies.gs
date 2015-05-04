@@ -1,123 +1,207 @@
+// Sheet we're using
+var sheets = {
+  real: {
+    adjacencies: 'Adjacencies',
+    territory_defs: 'Province names and IDs',
+  },
+  test: {
+    adjacencies: 'TEST.Adjacencies',
+    territory_defs: 'TEST.Province names and IDs',
+  },
+};
 
-/** Indices from territory definitions, so use cols+1 when using getRange */
-var def_cols = {
-  id: 0,
-  name: 1,
-  is_land: 2,
-  has_supply: 3,
-  empire_start: 4,
-  starting_forces: 5,
+function onOpen() {
+  var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  var entries = [{
+    name: "Export Territories",
+    functionName: "exportTerritories"
+  }, {
+    name: "Validate Symmetry",
+    functionName: "validateSymmetry"
+  }];
+  spreadsheet.addMenu("Diplmacy", entries);
 };
 
 
-/** Indices from territory definitions, so use cols+1 when using getRange */
-var adj_cols = {
-  id: 2,
-  name: 3,
-  tbl_start: 4,
-};
-
-var TYPES = {
-  IS_LAND:1,
-  IS_WATER:2,
-};
-
-function Territory() {
-  this.name='';
-  this.id=0;
-  this.type; // territory type
-  this.has_supply = 0;
-  this.empire_start = 0;
-  this.starting_forces = 0;
-
-  this.neighbours = []; // IDs of neighbouring territories.
+/**
+ * ////////////////////////////////////////
+ * // Hash map
+ * ////////////////////////////////////////
+ */
+function Map() {
+  this.mem = {};
+  this.keys = []; // no point in having length with keys (duplicate).. afterthough...
+  this.length = 0;
 }
-Territory.prototype.toString = function() {
-  return this.id + ':' + this.name;
-};
-Territory.prototype.addNeighbour = function(id) {
-  Logger.log('Adding neighbour %s to %s', id, this.toString());
-  this.neighbours.push(id);
-}
+Map.prototype.insert = function(val) {
+  var key = this.map(val);
+  if (typeof this.mem[key] === 'undefined') {
+    //Logger.log("[%s] Inserting: key=%s, val=%s", this.length, key, val.toString());
 
-
-
-
-var TerritoryMap = function() {
-  Map.apply(this);
-
-  this.loaded = false;
-}
-TerritoryMap.prototype = Map.prototype;
-TerritoryMap.prototype.constructor = TerritoryMap;
-
-Map.prototype.get = function(val) {
-  if (val === '') {
-    Logger.log('Error, requested .get with blank key');
-    return false;
+    this.mem[key] = val;
+    this.keys.push(key);
+    this.length++;
   }
-
-  if (parseInt(val)>0) {
-    // Dealing with IDs
-    for (var i=0; i< this.length; i++) {
-      if (this.mem[this.keys[i]].id == val) {
-        return this.mem[this.keys[i]];
-      }
-    }
-    return false;
-  } else {
-  // Serialize to a key
-	var key = this.map(val);
-	if (typeof this.mem[key] !== 'undefined') {
-		this.mem[key].key = key;
-		return this.mem[key];
-	} else {
-		return false;
-	}
-  }
-}
-
-TerritoryMap.prototype.map = function(val) {
-  var hash=val.name.replace(/^[\s\W]+/g, '');
-  hash = hash.replace(/[\s\W]+$/g, '');
-  hash = hash.replace(/[^a-zA-Z0-9]+/g, '_');
-  hash = hash.toLowerCase();
+};
+Map.prototype.map = function(val) {
+  var hash = val.toString();
+  hash = hash.replace(/\W/g, '');
+  hash = 'k' + hash;
   return hash;
 };
-TerritoryMap.prototype.load = function() {
-  if (this.loaded) return;
-	var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(territory_defs);
-	var range = sheet.getDataRange();
-	var numRows = range.getNumRows();
+Map.prototype.clear = function() {
+  this.mem = {};
+  this.keys = [];
+  this.length = 0;
+};
 
-	range = sheet.getRange(2, def_cols['id'] + 1, numRows - 1, 2); // assume id and name are adjacent
-	var values = range.getValues();
-	for (var i = 0; i < values.length; i++) {
-      var t = new Territory;
-      for (var j = 0; j < values[i].length; j++) {
-        switch (j) {
-          case 0:
-            t.id = values[i][j];
-            break;
-          case 1:
-            t.name = values[i][j];
-            break;
-          case 2:
-            t.type = (values[i][j] ? IS_LAND : IS_WATER);
-            break;
-          case 3:
-            t.has_supply = values[i][j];
-            break;
-          case 4:
-            t.empire_start = values[i][j];
-            break;
-          case 5:
-            t.starting_forces = values[i][j];
+Map.prototype.get = function(val) {
+  // Serialize to a key
+  var key = this.map(val);
+  if (typeof this.mem[key] !== 'undefined') {
+    this.mem[key].key = key;
+    return this.mem[key];
+  } else {
+    return false;
+  }
+}
+
+Map.prototype.exportArray = function(val) {
+  var output = [];
+  for (var i = 0; i < this.length; i++) {
+    var key = this.keys[i];
+    output.push(this.mem[key]);
+  }
+  return output;
+}
+
+
+
+/**
+ * ////////////////////////////////////////
+ * // Export Functions
+ * ////////////////////////////////////////
+ */
+function exportTerritories() {
+  var html = HtmlService.createHtmlOutputFromFile('export_territories')
+    .setSandboxMode(HtmlService.SandboxMode.NATIVE);
+  SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
+    .showModalDialog(html, 'Export Territories');
+}
+
+var territories;
+
+function loadTerritories(list) {
+  if (typeof list === 'undefined')
+    list = 'test';
+  if (typeof territories === 'undefined')
+    territories = new TerritoryMap();
+  territories.load(list);
+  Logger.log('Territory definitions loaded.');
+
+  // This will add adjancency/neighbour information on to each object
+  loadAdjacencies(list);
+
+  return territories.exportArray();
+};
+
+function loadAdjacencies(list) {
+
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheets[list].adjacencies);
+  var range = sheet.getDataRange();
+  var numRows = range.getNumRows();
+  var numCols = range.getNumColumns();
+  range = sheet.getRange(2, adj_cols['id'] + 1, numRows - 1, numCols - (adj_cols['name'] + 1)); // assume id and name are adjacent
+  var values = range.getValues();
+
+  var t;
+  var offset = adj_cols['tbl_start'] - adj_cols['id']; // This is the offset from the range to the start of the actual table we're examining
+  for (var i = 0; i < values.length; i++) {
+    t = null;
+
+    for (var k = 0; k < values[i].length; k++) { // the magic 2 is where the data starts
+
+      if (k == 0) {
+        t_id = values[i][k];
+        if (t_id === '') break;
+
+        Logger.log('Fetching territory for t_id=%s', t_id);
+        t = territories.get(t_id); // fetch by ID
+        if (t === null) {
+          Logger.log('Error Fetching territory for t_id=%s', t_id);
+          break;
+        }
+        continue;
+      } else if (k < offset)
+        continue;
+
+      var j = k - offset; // Offset to the beginning of the table.  k is the matrix index (starting at 0),
+      // Neighbour we're examing should have the ID (j+1)
+      var n_id = j + 1;
+      //Logger.log("t_id=%s", t_id);
+
+
+      // On the diagonal?
+      if (i == j) {
+
+        // TMP
+        cell = sheet.getRange(i + 2, k + (adj_cols['id'] + 1));
+        cell.setFontColor('#00FF00');
+        cell.setValue(0);
+
+        break;
+      }
+
+      if (parseInt(values[i][k]) == 1) {
+        t.addNeighbour(n_id); // relies on the ID's being sequential.  This assumption is used many times here
+      }
+    }
+  }
+
+}
+
+function validateSymmetry() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  if (sheet.getName() != sheets.real.adjacencies && sheet.getName() != sheets.test.adjacencies) {
+    var ui = SpreadsheetApp.getUi(); // Same variations.
+
+    ui.alert('Error!  Can only be run on a adjacency list!');
+    return;
+  }
+  var range = sheet.getDataRange();
+  var numRows = range.getNumRows();
+  var numCols = range.getNumColumns();
+  range = sheet.getRange(2, adj_cols['tbl_start'] + 1, numRows - 1, numCols - (adj_cols['tbl_start'] + 1));
+  var values = range.getValues();
+
+  for (var i = 0; i < values.length; i++) {
+    for (var j = 0; j < values[i].length; j++) {
+
+      if (i == j) continue;
+
+      if (values[i][j] != values[j][i]) {
+        var cell = null;
+        var val_ij = parseInt(values[i][j]);
+        var val_ji = parseInt(values[j][i]);
+
+        if (isNaN(val_ij)) val_ij = 0;
+        if (isNaN(val_ji)) val_ji = 0;
+
+        Logger.log('(%s,%s)=%s, (%s,%s)=%s', i, j, val_ij, j, i, val_ji);
+        if (val_ij >= 1 && val_ji < 1) {
+          cell = sheet.getRange(j + 2, adj_cols['tbl_start'] + 1 + i);
+        } else if (val_ji >= 1 && val_ij < 1) {
+          cell = sheet.getRange(i + 2, adj_cols['tbl_start'] + 1 + j);
+        }
+        if (cell !== null) {
+          Logger.log('setting value to red');
+          cell.setBackground('#FF0000');
+          cell.setValue('ERROR');
         }
       }
-      this.insert(t);
-	}
-  this.loaded = true;
-};
+
+    }
+  }
+}
 
 // vim: sw=2 ts=2 expandtab :

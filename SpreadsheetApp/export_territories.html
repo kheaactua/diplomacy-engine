@@ -1,0 +1,63 @@
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+<style type="text/css">
+#output {
+	/*border: 1px solid gray;*/
+	height: 60px;
+	overflow-x: none;
+	overflow-y: auto;
+	padding: 2px;
+	width: 95%;
+}
+#output textarea {
+	width: 98%;
+	height: 94%;
+}
+</style>
+
+<p>Copy and paste the output of this functon into <strong>territories.json</strong></p>
+
+<table>
+	<caption>Options</caption>
+	<tr>
+		<th>Real or Test Data</th>
+		<td>
+			<select name="lists" id="lists"><option value="real">Real</option><option value="test">Test</option></select>
+		</td>
+	</tr>
+</table>
+
+<div style="text-align:center;">
+	<button id="sub" onclick="generateJSON();">Export</button>
+</div>
+
+<div id="output">
+	<em>Content will appear here</em>
+</div>
+
+<div style="width: 100%; text-align:center">
+	<input type="button" value="Close" onclick="google.script.host.close()" />
+</div>
+
+<script>
+
+  google.script.host.setHeight(550);
+  google.script.host.setWidth(700);
+
+  function writeOutput(territories) {
+    $('#output').children().remove();
+    $('#output').append($('<textarea></textarea>'));
+    $('#output textarea').text(JSON.stringify(territories));
+  }
+	function generateJSON() {
+    var list = $('#lists   :selected').val();
+		$('#output').children().remove();
+		$('#output').height(360);
+
+		google.script.run.withSuccessHandler(writeOutput).loadTerritories(list);
+	}
+
+</script>
+
+<!-- vim: sw=2 ts=2 sts=2 expandtab :
+-->
