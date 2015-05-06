@@ -2,7 +2,13 @@
 
 namespace DiplomacyEngine\Orders;
 
-abstract class Order {
+interface iOrder  {
+	/** Returns the string representation of the order */
+	public function __toString();
+
+}
+
+abstract class Order implements iOrder {
 	/**
 	 * Format of the order, uses replacable strings
 	 *
@@ -41,6 +47,8 @@ abstract class Order {
 	public function __toString() {
 		return "n/a";
 	}
+
+	/** Serialize the order into a string using a format */
 	protected function generateOrder($keys, $vals) {
 		array_walk($keys, function(&$e) { $e = "/%$e%/"; });
 		$str = preg_replace($keys, $vals, $this->format);

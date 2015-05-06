@@ -7,7 +7,7 @@ interface iPlayer {
 }
 
 // going to be replaced with a propel class
-class Player {
+class Player implements iPlayer {
 	public function __construct($name) {
 		$this->name = $name;
 	}
