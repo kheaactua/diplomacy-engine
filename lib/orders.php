@@ -6,6 +6,8 @@ interface iOrder  {
 	/** Returns the string representation of the order */
 	public function __toString();
 
+	/** Marks the order as failed */
+	public function fail($reason);
 }
 
 abstract class Order implements iOrder {
@@ -34,6 +36,14 @@ abstract class Order implements iOrder {
 	 */
 	public $player;
 
+	/**
+	 * Whether this order has failed
+	 */
+	protected $failed;
+
+	/**
+	 * Transcript, mostly for fail messages */
+
 	public function __construct(
 		\DiplomacyEngine\Players\Player $player,
 		\DiplomacyEngine\Territories\Territory $source,
@@ -42,6 +52,11 @@ abstract class Order implements iOrder {
 		$this->player = $player;
 		$this->source = $source;
 		$this->dest   = $dest;
+		$this->transcript = array();
+	}
+
+	public function failed() {
+		return $this->failed;
 	}
 
 	public function __toString() {
@@ -54,6 +69,25 @@ abstract class Order implements iOrder {
 		$str = preg_replace($keys, $vals, $this->format);
 		return $str;
 	}
+
+	/** Marks the order as failed */
+	public function fail($reason) {
+		$this->transcript[] = $reason;
+		$this->failed = true;
+	}
+
+	/**
+	 * Function to return the player being supported by this order.
+	 * This will typically be the player, except for in support orders.
+	 */
+	public function supporting() {
+		return $this->player;
+	}
+	public function getPlayer() {
+		return $player;
+	}
+
+
 }
 
 class Move extends Order {

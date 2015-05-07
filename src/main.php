@@ -2,9 +2,9 @@
 <?php
 namespace DiplomacyEngine;
 use DiplomacyEngine\Players\Player as Player;
-use DiplomacyEngine\Terriroties\Territory as Territory;
+use DiplomacyEngine\Territories\Territory as Territory;
 use DiplomacyEngine\Orders\Order as Order;
-use DiplomacyEngine\Games\Game as Game;
+use DiplomacyEngine\Game\Game as Game;
 
 require_once( __DIR__ . '/../config/config.php');
 
@@ -29,5 +29,7 @@ print "Texas-Sequoia? " . ($texas->isNeighbour($sequoia) ? 'PASS':'FAIL') . "\n"
 print "Sequoia-Texas? " . ($sequoia->isNeighbour($texas) ? 'PASS':'FAIL') . "\n";
 print "Texas-Ohio? "    . ($texas->isNeighbour($ohio) ? 'FAIL':'PASS') . "\n";
 
+
+$game = new Game("The past", 1812);
 
 // vim: ts=3 sw=3 noet :

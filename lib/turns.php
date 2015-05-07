@@ -44,6 +44,10 @@ class Turn implements iTurn {
 		$this->turn = $turn;
 	}
 
+	public function addOrder(Order $order) {
+		$this->orders[] = $order;
+	}
+
 	public function resolveAttacks() {
 		$this->validateOrders();
 		$this->removeOrdersFromAttackedTerritories();
@@ -55,14 +59,32 @@ class Turn implements iTurn {
 	 * to a turn, run this just in case.  This will call order->Validate
 	 * which will ensure that all the parameters in an order make sense */
 	protected function validateOrders() {
-
+		$this->territories=array();
+		foreach ($old as $o) {
+			if (!$o->isValid()) {
+			  $o->fail('Invalid');
+			}
+		}
 	}
 
 	/** Iterates through the list of orders, and removes any order
 	 * who's source territory is the attack destination of another
 	 * player. */
 	protected function removeOrdersFromAttackedTerritories() {
+		foreach ($this->orders as &$order) {
+			if ($order->failed()) continue;
+			foreach ($this->orders as $ref) {
+				if ($ref>failed()) continue;
+				if ($order == $ref) continue;
 
+				if (
+					$order->source == $ref>dest
+					&& $order->supporting() != $ref->supporting
+				) {
+					$order->fail("Source territory (". $order->source .") is being acted on by ". $ref->getPlayer() . " in '". $ref . "'");
+				)
+			}
+		}
 	}
 
 	/**
@@ -73,11 +95,8 @@ class Turn implements iTurn {
 	 * Iterate through the orders, and increment the 'count' in the structure above every
 	 * time a player attacks a teritory or is supported.
 	 *
-	 * Then, loop again to determine who won each territory based on the largest 'count',
-// Wrong! well, sort of.  Need to determine the winning ORDERs
-// User $order->fail to mark failed orders.
-	 * and record this as $territories[territory_id]['winner'] = player_id, and 
-	 * $territories[territory_id]['losers'] = array(loser_player_ids);
+	 * Then, iterate again through the orders, and mark every order that supports the
+	 * winner as "success", and all others as "failed"
 	 **/
 	protected function resolveOrders() {
 
