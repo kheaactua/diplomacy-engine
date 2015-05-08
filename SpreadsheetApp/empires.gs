@@ -2,17 +2,17 @@
 var def_cols = {
   id: 0, // string
   name_official: 1,
-  name_full: 2,
+  name_long: 2,
   name_short: 3,
   comments: 4,
 };
 
 function Empire() {
   this.id = '';
-  name_official = '';
-  name_full     = '';
-  name_short    = '';
-  comments      = '';
+  this.name_official = '';
+  this.name_long     = '';
+  this.name_short    = '';
+  this.comments      = '';
 }
 Empire.prototype.toString = function() {
   return this.id;
@@ -36,7 +36,7 @@ EmpireMap.prototype.load = function(list) {
   var range = sheet.getDataRange();
   var numRows = range.getNumRows();
 
-  range = sheet.getRange(2, def_cols['id'] + 1, numRows - 1, 2); // assume id and name are adjacent
+  range = sheet.getRange(2, def_cols['id'] + 1, numRows - 1, 5); // assume id and name are adjacent
   var values = range.getValues();
   for (var i = 0; i < values.length; i++) {
     var t = new Empire;
