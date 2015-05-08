@@ -2,9 +2,9 @@
 
 namespace DiplomacyEngine\Turns;
 
-use DiplomacyEngine\Players\iGame as Game;
+use DiplomacyEngine\Game\iGame as Game;
 use DiplomacyEngine\Players\iPlayer as Player;
-use DiplomacyEngine\Players\iOrder as Order;
+use DiplomacyEngine\Orders\iOrder as Order;
 
 interface iTurn {
 	/** Add a player */
@@ -15,10 +15,10 @@ interface iTurn {
 	public function resolveAttacks();
 
 	/** Resolves all the retreat orders */
-	public function resolveRetreats();
+	function resolveRetreats();
 
 	/** Carry out the succesful orders */
-	public funtion carryOutOrders();
+	function carryOutOrders();
 
 }
 
@@ -59,8 +59,9 @@ class Turn implements iTurn {
 	 * to a turn, run this just in case.  This will call order->Validate
 	 * which will ensure that all the parameters in an order make sense */
 	protected function validateOrders() {
-		$this->territories=array();
-		foreach ($old as $o) {
+		//$old = $this->game->getTerritories();
+		//$this->territories=array();
+		foreach ($this->orders as &$o) {
 			if (!$o->isValid()) {
 			  $o->fail('Invalid');
 			}
@@ -74,7 +75,7 @@ class Turn implements iTurn {
 		foreach ($this->orders as &$order) {
 			if ($order->failed()) continue;
 			foreach ($this->orders as $ref) {
-				if ($ref>failed()) continue;
+				if ($ref->failed()) continue;
 				if ($order == $ref) continue;
 
 				if (
@@ -82,7 +83,7 @@ class Turn implements iTurn {
 					&& $order->supporting() != $ref->supporting
 				) {
 					$order->fail("Source territory (". $order->source .") is being acted on by ". $ref->getPlayer() . " in '". $ref . "'");
-				)
+				}
 			}
 		}
 	}
@@ -102,7 +103,12 @@ class Turn implements iTurn {
 
 	}
 
-	protected function carryOutOrders() {
+	function resolveRetreats() {
+
+	}
+
+
+	function carryOutOrders() {
 
 	}
 

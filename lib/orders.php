@@ -11,6 +11,7 @@ interface iOrder  {
 }
 
 abstract class Order implements iOrder {
+
 	/**
 	 * Format of the order, uses replacable strings
 	 *
@@ -37,18 +38,26 @@ abstract class Order implements iOrder {
 	public $player;
 
 	/**
+	 * Unit/Force type (fleet or army)
+	 */
+	public $unit_type;
+
+	/**
 	 * Whether this order has failed
 	 */
 	protected $failed;
 
 	/**
 	 * Transcript, mostly for fail messages */
+	protected $transcript;
 
 	public function __construct(
+		$unit_type = UNIT_ARMY,
 		\DiplomacyEngine\Players\Player $player,
 		\DiplomacyEngine\Territories\Territory $source,
 		\DiplomacyEngine\Territories\Territory $dest
 	) {
+		$this->unit_type = $unit_type;
 		$this->player = $player;
 		$this->source = $source;
 		$this->dest   = $dest;
@@ -87,6 +96,7 @@ abstract class Order implements iOrder {
 		return $player;
 	}
 
+	abstract public function isValid();
 
 }
 
@@ -105,6 +115,9 @@ class Move extends Order {
 		return $str;
 	}
 
+	public function isValid() {
+		return true;	
+	}
 }
 
 // vim: ts=3 sw=3 noet :

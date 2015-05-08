@@ -1,11 +1,11 @@
 <?php
 
 namespace DiplomacyEngine\Territories;
+use DiplomacyEngine\Players\Player as Player;
 
 /** Terrotory type */
 define('TERR_LAND', 1);
-//define('IS_COAST', 2);
-define('TERR_WATER', 3);
+define('TERR_WATER', 2);
 
 interface iTerritory {
 	public function __toString();
@@ -36,6 +36,8 @@ interface iTerritory {
 	public function isNeighbour(iTerritory $neighbour);
 	public function getNeighbours();
 
+	public function setOccupier(Player $occupier, $unit_type);
+
 	/** Short name, used as array key, and other non-user stuff */
 	//public function shortName();
 
@@ -50,12 +52,19 @@ class Territory implements iTerritory {
 	protected $is_supply;
 	protected $id;
 
+	protected $occupier;
+	protected $unit_type;
+
 	public function __construct($id, $name, $type = TERR_LAND) {
 		$this->id = $id;
 		$this->name = $name;
 		$this->setType($type);
 		$this->is_supply = false;
 		$this->neighbours = array();
+
+		$this->occupier = null;
+		$this->unit_type = UNIT_ARMY;
+
 	}
 	public function __toString() {
 		return $this->name;
@@ -79,7 +88,7 @@ class Territory implements iTerritory {
 		} elseif (strtolower($type) == 'water') {
 			$this->type = TERR_WATER;
 		} else {
-			trigger_error('Attempted to set invalid territory type');
+			trigger_error("Attempted to set invalid territory type: $type");
 		}
 	}
 
@@ -106,12 +115,21 @@ class Territory implements iTerritory {
 		$this->is_supply = $hasSupply;
 	}
 
+	public function setOccupier(Player $occupier, $unit_type) {
+			$this->occupier  = $occupier;
+			$this->unit_type = $unit_type;
+	}
 
-	public static function createTerritories(array $objs) {
+	public static function loadTerritories(array $empires, array $objs) {
 		$ts = array();
 		foreach ($objs as $obj) {
 			$t = new Territory($obj->id, $obj->name, $obj->type);
 			$t->setSupplyCenter($obj->has_supply);
+
+			if (array_key_exists($obj->empire_start, $empires)) {
+				$t->setOccupier($empires[$obj->empire_start], $obj->starting_forces);
+			};
+
 			$ts[$t->getId()] = $t;
 		}
 
