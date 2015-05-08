@@ -22,7 +22,19 @@
 	<tr>
 		<th>Real or Test Data</th>
 		<td>
-			<select name="lists" id="lists"><option value="real">Real</option><option value="test">Test</option></select>
+			<select name="lists" id="lists">
+                <option value="test">Test</option>
+                <option value="real">Real</option>
+            </select>
+		</td>
+	</tr>
+    <tr>
+		<th>Dataset</th>
+		<td>
+			<select name="dataset" id="dataset">
+        <option value="empires">Empires</option>
+        <option value="territories">Territories</option>
+      </select>
 		</td>
 	</tr>
 </table>
@@ -41,7 +53,7 @@
 
 <script>
 
-  google.script.host.setHeight(550);
+	google.script.host.setHeight(550);
   google.script.host.setWidth(700);
 
   function writeOutput(territories) {
@@ -50,11 +62,12 @@
     $('#output textarea').text(JSON.stringify(territories));
   }
 	function generateJSON() {
-    var list = $('#lists   :selected').val();
+    var list    = $('#lists   :selected').val();
+    var dataset = $('#dataset :selected').val();
 		$('#output').children().remove();
 		$('#output').height(360);
 
-		google.script.run.withSuccessHandler(writeOutput).loadTerritories(list);
+		google.script.run.withSuccessHandler(writeOutput).loadData(list, dataset);
 	}
 
 </script>
