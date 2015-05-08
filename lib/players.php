@@ -27,7 +27,7 @@ class Player implements iPlayer {
 		$this->name_short    = $name_short;
 	}
 	public function __toString() {
-		return $this->name;
+		return $this->id;
 	}
 
 	public function getId() {

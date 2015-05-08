@@ -1,15 +1,15 @@
 <?php
 
-namespace DiplomacyEngine\Game;
+namespace DiplomacyEngine\Match;
 
 use DiplomacyEngine\Players\iPlayer as Player;
 use DiplomacyEngine\Turns\Turn as Turn;
 
-interface iGame {
+interface iMatch {
 	/** Add a player */
 	public function addPlayer(Player $player);
 
-	/** Start the game */
+	/** Start the match */
 	public function start();
 
 	/** Advance to the next turn */
@@ -25,7 +25,7 @@ interface iGame {
 	public function __toString();
 }
 
-class Game implements iGame {
+class Match implements iMatch {
 	protected $name;
 	protected $year;
 	protected $time;
@@ -36,8 +36,8 @@ class Game implements iGame {
 
 	protected $seasons;
 	/**
-	 * New game.
-	 * @param $name Name of the game/map
+	 * New match.
+	 * @param $name Name of the match/map
 	 * @param $year Stating year, i.e. 1846
 	 * @param $season Starting season (0=spring, 1=fall)
 	 **/
@@ -66,11 +66,6 @@ class Game implements iGame {
 		$this->next();
 	}
 
-	public function __toString() {
-		$str = "$this->name ";
-		$str .= $this->seasons[$this->time % 2] . " ";
-		$str .= $this->year + floor($this->time/2);
-	}
 
 	public function getCurrentTurn() {
 		return $this->currentTurn;
@@ -85,6 +80,27 @@ class Game implements iGame {
 	}
 	public function getTerritories() {
 		return $this->territories;
+	}
+
+	public function state() {
+		$state = array();
+		foreach ($this->territories as $t) {
+			$state[$t->getId()] = array($t, $t->getOccupier());
+		}
+		return $state;
+	}
+
+	public function __toString() {
+		$str = "$this->name: ";
+		$str .= $this->seasons[$this->time % 2] . " ";
+		$str .= $this->year + floor($this->time/2) . "\n";
+
+		$str .= "\n";
+		$state = $this->state();
+		foreach ($state as $s) {
+			$str .= str_pad($s[0], 30) . str_pad($s[1], 12) . ($s[0]->getUnitType()==UNIT_ARMY?'A':'F') . "\n";
+		}
+		return $str;
 	}
 }
 

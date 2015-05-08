@@ -5,7 +5,7 @@ use DiplomacyEngine\Players\Player as Player;
 use DiplomacyEngine\Territories\Territory as Territory;
 use DiplomacyEngine\Orders\Order as Order;
 use DiplomacyEngine\Orders\Move as Move;
-use DiplomacyEngine\Game\Game as Game;
+use DiplomacyEngine\Match\Match as Match;
 
 require_once( __DIR__ . '/../config/config.php');
 
@@ -45,13 +45,15 @@ $t_b = Territory::findTerritoryByName($territories, 'B');
 $t_c = Territory::findTerritoryByName($territories, 'C');
 $t_d = Territory::findTerritoryByName($territories, 'D');
 
-$game = new Game("The past", 1812);
-$game->setPlayers($players);
-$game->setTerritories($territories);
-$game->start();
-$turn = $game->getCurrentTurn();
+$match = new Match("The past", 1812);
+$match->setPlayers($players);
+$match->setTerritories($territories);
+$match->start();
+$turn = $match->getCurrentTurn();
 
 $turn->addOrder(new Move(UNIT_ARMY, $red, $t_a, $t_b));
 $turn->resolveAttacks();
+
+print $match;
 
 // vim: ts=3 sw=3 noet :

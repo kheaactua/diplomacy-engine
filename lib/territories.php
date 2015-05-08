@@ -72,6 +72,9 @@ class Territory implements iTerritory {
 	public function getId() { return $this->id; }
 	public function getName() { return $this->name; }
 
+	public function getOccupier() { return $this->occupier; }
+	public function getUnitType() { return $this->unit_type; }
+
 	/** @return bool Check if $this is land */
 	public function isLand() { return $this->type == TERR_LAND; }
 

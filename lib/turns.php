@@ -2,7 +2,7 @@
 
 namespace DiplomacyEngine\Turns;
 
-use DiplomacyEngine\Game\iGame as Game;
+use DiplomacyEngine\Match\iMatch as Match;
 use DiplomacyEngine\Players\iPlayer as Player;
 use DiplomacyEngine\Orders\iOrder as Order;
 
@@ -24,7 +24,7 @@ interface iTurn {
 
 class Turn implements iTurn {
 
-	protected $game;
+	protected $match;
 	protected $turn;
 	protected $orders;
 
@@ -35,11 +35,11 @@ class Turn implements iTurn {
 	/**
 	 * Constructs a new turn.
 	 *
-	 * @param iGame The game being played
+	 * @param iMatch The match being played
 	 * @param int $turn The number of the turn.  Even represents spring, odd represents fall
 	 **/
-	public function __construct(Game $game, $turn) {
-		$this->game = $game;
+	public function __construct(Match $match, $turn) {
+		$this->match = $match;
 		$this->orders = array();
 		$this->turn = $turn;
 	}
@@ -59,7 +59,7 @@ class Turn implements iTurn {
 	 * to a turn, run this just in case.  This will call order->Validate
 	 * which will ensure that all the parameters in an order make sense */
 	protected function validateOrders() {
-		//$old = $this->game->getTerritories();
+		//$old = $this->match>getTerritories();
 		//$this->territories=array();
 		foreach ($this->orders as &$o) {
 			if (!$o->isValid()) {
@@ -89,7 +89,7 @@ class Turn implements iTurn {
 	}
 
 	/**
-	 * Build a list of territories from the Game and place it in $this->territories
+	 * Build a list of territories from the Match and place it in $this->territories
 	 * with the structure
 	 * $territories[territory_id] = array(player1_id => count, player2_id => count, ...)
 	 *
