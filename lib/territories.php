@@ -1,7 +1,7 @@
 <?php
 
 namespace DiplomacyEngine\Territories;
-use DiplomacyEngine\Players\Player as Player;
+use DiplomacyEngine\Empires\Empire as Empire;
 
 /** Terrotory type */
 define('TERR_LAND', 1);
@@ -36,7 +36,7 @@ interface iTerritory {
 	public function isNeighbour(iTerritory $neighbour);
 	public function getNeighbours();
 
-	public function setOccupier(Player $occupier, $unit_type);
+	public function setOccupier(Empire $occupier, $unit);
 
 	/** Short name, used as array key, and other non-user stuff */
 	//public function shortName();
@@ -53,7 +53,7 @@ class Territory implements iTerritory {
 	protected $id;
 
 	protected $occupier;
-	protected $unit_type;
+	protected $unit;
 
 	public function __construct($id, $name, $type = TERR_LAND) {
 		$this->id = $id;
@@ -63,7 +63,7 @@ class Territory implements iTerritory {
 		$this->neighbours = array();
 
 		$this->occupier = null;
-		$this->unit_type = UNIT_ARMY;
+		$this->unit = UNIT_ARMY;
 
 	}
 	public function __toString() {
@@ -73,7 +73,7 @@ class Territory implements iTerritory {
 	public function getName() { return $this->name; }
 
 	public function getOccupier() { return $this->occupier; }
-	public function getUnitType() { return $this->unit_type; }
+	public function getUnitType() { return $this->unit; }
 
 	/** @return bool Check if $this is land */
 	public function isLand() { return $this->type == TERR_LAND; }
@@ -118,9 +118,9 @@ class Territory implements iTerritory {
 		$this->is_supply = $hasSupply;
 	}
 
-	public function setOccupier(Player $occupier, $unit_type) {
+	public function setOccupier(Empire $occupier, $unit) {
 			$this->occupier  = $occupier;
-			$this->unit_type = $unit_type;
+			$this->unit = $unit;
 	}
 
 	public static function loadTerritories(array $empires, array $objs) {

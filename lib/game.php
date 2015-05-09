@@ -2,12 +2,12 @@
 
 namespace DiplomacyEngine\Match;
 
-use DiplomacyEngine\Players\iPlayer as Player;
+use DiplomacyEngine\Empires\iEmpire as Empire;
 use DiplomacyEngine\Turns\Turn as Turn;
 
 interface iMatch {
-	/** Add a player */
-	public function addPlayer(Player $player);
+	/** Add a empire */
+	public function addEmpire(Empire $empire);
 
 	/** Start the match */
 	public function start();
@@ -19,7 +19,7 @@ interface iMatch {
 	public function getCurrentTurn();
 
 	/** Setters */
-	public function setPlayers(array $players);
+	public function setEmpires(array $empires);
 	public function setTerritories(array $territories);
 
 	public function __toString();
@@ -30,7 +30,7 @@ class Match implements iMatch {
 	protected $year;
 	protected $time;
 
-	protected $players;
+	protected $empires;
 	protected $currentTurn;
 	protected $turns;
 
@@ -46,15 +46,15 @@ class Match implements iMatch {
 		$this->year = $year;
 		$this->time = $season ? 1 : 0;
 
-		$this->players = array();
+		$this->empires = array();
 
 		$this->seasons = array('Spring', 'Fall');
 		$this->currentTurn=null;
 		$this->turns = array();
 	}
 
-	public function addPlayer(Player $player) {
-		$this->players[] = $player;
+	public function addEmpire(Empire $empire) {
+		$this->empires[] = $empire;
 	}
 
 	public function next() {
@@ -72,8 +72,8 @@ class Match implements iMatch {
 	}
 
 
-	public function setPlayers(array $players) {
-		$this->players = $players;
+	public function setEmpires(array $empires) {
+		$this->empires = $empires;
 	}
 	public function setTerritories(array $territories) {
 		$this->territories = $territories;

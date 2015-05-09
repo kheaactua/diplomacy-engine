@@ -3,11 +3,11 @@
 namespace DiplomacyEngine\Turns;
 
 use DiplomacyEngine\Match\iMatch as Match;
-use DiplomacyEngine\Players\iPlayer as Player;
+use DiplomacyEngine\Empires\iEmpire as Empire;
 use DiplomacyEngine\Orders\iOrder as Order;
 
 interface iTurn {
-	/** Add a player */
+	/** Add a empire */
 	public function addOrder(Order $order);
 
 	/** Resolves all the orders in this turn, and determine
@@ -62,7 +62,7 @@ class Turn implements iTurn {
 		//$old = $this->match>getTerritories();
 		//$this->territories=array();
 		foreach ($this->orders as &$o) {
-			if (!$o->isValid()) {
+			if (!$o->validate()) {
 			  $o->fail('Invalid');
 			}
 		}
@@ -70,7 +70,7 @@ class Turn implements iTurn {
 
 	/** Iterates through the list of orders, and removes any order
 	 * who's source territory is the attack destination of another
-	 * player. */
+	 * empire. */
 	protected function removeOrdersFromAttackedTerritories() {
 		foreach ($this->orders as &$order) {
 			if ($order->failed()) continue;
@@ -79,10 +79,10 @@ class Turn implements iTurn {
 				if ($order == $ref) continue;
 
 				if (
-					$order->source == $ref>dest
+					$order->source == $ref->dest
 					&& $order->supporting() != $ref->supporting
 				) {
-					$order->fail("Source territory (". $order->source .") is being acted on by ". $ref->getPlayer() . " in '". $ref . "'");
+					$order->fail("Source territory (". $order->source .") is being acted on by ". $ref->getEmpire() . " in '". $ref . "'");
 				}
 			}
 		}
@@ -91,10 +91,10 @@ class Turn implements iTurn {
 	/**
 	 * Build a list of territories from the Match and place it in $this->territories
 	 * with the structure
-	 * $territories[territory_id] = array(player1_id => count, player2_id => count, ...)
+	 * $territories[territory_id] = array(empire1_id => count, empire2_id => count, ...)
 	 *
 	 * Iterate through the orders, and increment the 'count' in the structure above every
-	 * time a player attacks a teritory or is supported.
+	 * time a empire attacks a teritory or is supported.
 	 *
 	 * Then, iterate again through the orders, and mark every order that supports the
 	 * winner as "success", and all others as "failed"
@@ -110,6 +110,20 @@ class Turn implements iTurn {
 
 	function carryOutOrders() {
 
+	}
+
+	public function printOrders() {
+		$str = "Orders:\n";
+		foreach ($this->orders as $o) {
+			$str .= str_pad($o, 40) . ($o->failed()?'FAIL':'PASS') . "\n";
+			if ($o->failed()) {
+				$transcript = $o->getTranscript();
+				foreach ($transcript as $t) {
+					$str .= " - $t\n";
+				}
+			}
+		}
+		print $str."\n";
 	}
 
 }

@@ -1,19 +1,19 @@
 <?php
 
-namespace DiplomacyEngine\Players;
+namespace DiplomacyEngine\Empires;
 
 define('UNIT_ARMY', 1);
 define('UNIT_FLEET', 2);
 
-interface iPlayer {
+interface iEmpire {
 	public function __toString();
 
-	/** Player ID **/
+	/** Empire ID **/
 	public function getId();
 }
 
 // going to be replaced with a propel class
-class Player implements iPlayer {
+class Empire implements iEmpire {
 
 	protected $id;
 	protected $name_official;
@@ -34,13 +34,13 @@ class Player implements iPlayer {
 		return $this->id;
 	}
 
-	public static function loadPlayers(array $objs) {
-		$players = array();
+	public static function loadEmpires(array $objs) {
+		$empires = array();
 		foreach ($objs as $obj) {
-			$t = new Player($obj->id, $obj->name_official, $obj->name_long, $obj->name_short);
-			$players[$t->getId()] = $t;
+			$t = new Empire($obj->id, $obj->name_official, $obj->name_long, $obj->name_short);
+			$empires[$t->getId()] = $t;
 		}	
-		return $players;
+		return $empires;
 	}
 
 

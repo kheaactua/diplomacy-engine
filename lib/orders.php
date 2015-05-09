@@ -33,14 +33,14 @@ abstract class Order implements iOrder {
 	public $dest;
 
 	/**
-	 * The player initiating the order
+	 * The empire initiating the order
 	 */
-	public $player;
+	public $empire;
 
 	/**
 	 * Unit/Force type (fleet or army)
 	 */
-	public $unit_type;
+	public $unit;
 
 	/**
 	 * Whether this order has failed
@@ -52,13 +52,13 @@ abstract class Order implements iOrder {
 	protected $transcript;
 
 	public function __construct(
-		$unit_type = UNIT_ARMY,
-		\DiplomacyEngine\Players\Player $player,
+		$unit= UNIT_ARMY,
+		\DiplomacyEngine\Empires\Empire $empire,
 		\DiplomacyEngine\Territories\Territory $source,
 		\DiplomacyEngine\Territories\Territory $dest
 	) {
-		$this->unit_type = $unit_type;
-		$this->player = $player;
+		$this->unit= $unit;
+		$this->empire = $empire;
 		$this->source = $source;
 		$this->dest   = $dest;
 		$this->transcript = array();
@@ -66,6 +66,10 @@ abstract class Order implements iOrder {
 
 	public function failed() {
 		return $this->failed;
+	}
+
+	public function getTranscript() {
+		return $this->transcript;
 	}
 
 	public function __toString() {
@@ -86,38 +90,42 @@ abstract class Order implements iOrder {
 	}
 
 	/**
-	 * Function to return the player being supported by this order.
-	 * This will typically be the player, except for in support orders.
+	 * Function to return the empire being supported by this order.
+	 * This will typically be the empire, except for in support orders.
 	 */
 	public function supporting() {
-		return $this->player;
+		return $this->empire;
 	}
-	public function getPlayer() {
-		return $player;
+	public function getEmpire() {
+		return $empire;
 	}
 
-	abstract public function isValid();
+	public function validate() {
+		if ($this->failed()) return false;
+
+		// Does the empire own the source territory
+		if ($this->source->getOccupier() != $this->empire) {
+			$this->fail("$this->empire does not occupy $this->source");
+		}
+	}
 
 }
 
 class Move extends Order {
-	public $format = "%cmd% %source%-%dest%";
+	public $format = "%empire% %cmd% %unit% %source%-%dest%";
 
 	/** The command assoiated with this order */
 	public $cmd = "MOVE";
 
 	public function __toString() {
 		$str = $this->generateOrder(
-			array('cmd', 'source', 'dest'),
-			array($this->cmd, $this->source, $this->dest)
+			array('empire', 'unit', 'cmd', 'source', 'dest'),
+			array($this->empire, $this->unit==UNIT_ARMY?'ARMY':'FLEET', $this->cmd, $this->source, $this->dest)
 		);
 
 		return $str;
 	}
 
-	public function isValid() {
-		return true;	
-	}
 }
 
 // vim: ts=3 sw=3 noet :
