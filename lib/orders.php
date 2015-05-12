@@ -84,8 +84,9 @@ abstract class Order implements iOrder {
 	}
 
 	/** Marks the order as failed */
-	public function fail($reason) {
-		$this->transcript[] = $reason;
+	public function fail($reason='') {
+		if (strlen($reason))
+			$this->transcript[] = $reason;
 		$this->failed = true;
 	}
 
