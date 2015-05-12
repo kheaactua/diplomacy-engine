@@ -50,6 +50,7 @@ $match->setEmpires($empires);
 $match->setTerritories($territories);
 $match->start();
 $turn = $match->getCurrentTurn();
+print "\n" . $match ."\n";
 
 $turn->addOrder(new Move(UNIT_ARMY, $red, $t_a, $t_b));
 $turn->addOrder(new Move(UNIT_ARMY, $blue, $t_a, $t_b));
