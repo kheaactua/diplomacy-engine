@@ -134,6 +134,38 @@ class Move extends Order {
 
 		return $str;
 	}
+}
+
+
+class Support extends Order {
+	public $format = "%empire% %cmd% %aly% %source%-%dest%";
+
+	/** The command assoiated with this order */
+	public $cmd = "SUPPORT";
+
+	public function __construct(
+		Unit $unit,
+		\DiplomacyEngine\Empires\Empire $empire,
+		\DiplomacyEngine\Empires\Empire $aly,
+		\DiplomacyEngine\Territories\Territory $source,
+		\DiplomacyEngine\Territories\Territory $dest
+	) {
+		parent::__construct($unit, $empire, $source, $dest);
+		$this->aly = $aly;
+
+	}
+	public function supporting() {
+		return $this->aly;
+	}
+
+	public function __toString() {
+		$str = $this->generateOrder(
+			array('empire', 'aly', 'unit', 'cmd', 'source', 'dest'),
+			array($this->empire, $this->aly, $this->unit->__toString(), $this->cmd, $this->source, $this->dest)
+		);
+
+		return $str;
+	}
 
 }
 

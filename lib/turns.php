@@ -166,10 +166,14 @@ class Turn implements iTurn {
 
 			foreach ($map['orders'] as &$o) {
 				if ($o->failed()) continue;
+
 				if ($o instanceof Orders\Move) {
 					if ($o->dest == $t) {
-print "Order $o\n";
 						$tally->inc($o->getEmpire());
+					}
+				} elseif ($o instanceof Orders\Support) {
+					if ($o->dest == $t) {
+						$tally->inc($o->supporting());
 					}
 				} else {
 					trigger_error("Not sure how to perform [". get_class($o). "] $o");
@@ -254,7 +258,7 @@ class PlayerMap {
 		$this->map = array();
 
 		if (!is_null($default)) {
-print "Adding default point to $default\n";
+//print "Adding default point to $default\n";
 			$this->inc($default); // add starting 'defenders' point
 			$this->winner = $default; // Set as default winner
 		} else {
@@ -272,7 +276,7 @@ print "Adding default point to $default\n";
 		$c = -1;
 		foreach ($this->map as $empire_id=>$arr) {
 			if ($arr['tally'] > $c) {
-print "{$arr['empire']}={$arr['tally']} > $c\n";
+//print "{$arr['empire']}={$arr['tally']} > $c\n";
 				$c = $arr['tally'];
 				$this->winner = $arr['empire'];
 			}

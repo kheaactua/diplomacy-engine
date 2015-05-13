@@ -6,6 +6,7 @@ use DiplomacyEngine\Empires\Unit;
 use DiplomacyEngine\Territories\Territory;
 use DiplomacyEngine\Orders\Order as Order;
 use DiplomacyEngine\Orders\Move as Move;
+use DiplomacyEngine\Orders\Support as Support;
 use DiplomacyEngine\Match\Match as Match;
 
 require_once( __DIR__ . '/../config/config.php');
@@ -55,9 +56,24 @@ $match->start();
 $turn = $match->getCurrentTurn();
 print "\n" . $match ."\n";
 
-$turn->addOrder(new Move(new Unit('Army'), $red, $t_a, $t_b));
-$turn->addOrder(new Move(new Unit('Army'), $blue, $t_a, $t_b));
-$turn->addOrder(new Move(new Unit('Army'), $green, $t_e, $t_d));
+$case = 2;
+switch ($case) {
+	case 1;
+		// Test move conflict
+		$turn->addOrder(new Move(new Unit('Army'), $red, $t_a, $t_b));
+		$turn->addOrder(new Move(new Unit('Army'), $red, $t_a, $t_c));
+		$turn->addOrder(new Move(new Unit('Army'), $blue, $t_a, $t_b));
+		$turn->addOrder(new Move(new Unit('Army'), $green, $t_e, $t_d));
+		break;
+	case 2;
+		// Test support
+		$turn->addOrder(new Move(new Unit('Army'), $red, $t_a, $t_b));
+		$turn->addOrder(new Move(new Unit('Army'), $blue, $t_a, $t_b));
+		$turn->addOrder(new Support(new Unit('Army'), $green, $red, $t_e, $t_b));
+		break;
+}
+
+
 $turn->resolveAttacks();
 
 // Show which orders have failed, etc
