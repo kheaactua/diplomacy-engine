@@ -179,6 +179,7 @@ print "Order $o\n";
 
 		foreach ($ters as $t_id=>&$map) {
 			// Find the winner of each territory
+			$t = $map['territory'];
 			$winner = $map['tally']->findWinner()->winner();
 
 			if (is_null($winner)) {
