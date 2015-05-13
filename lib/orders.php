@@ -1,6 +1,7 @@
 <?php
 
 namespace DiplomacyEngine\Orders;
+use DiplomacyEngine\Empires\Unit;
 
 interface iOrder  {
 	/** Returns the string representation of the order */
@@ -40,7 +41,7 @@ abstract class Order implements iOrder {
 	/**
 	 * Unit/Force type (fleet or army)
 	 */
-	public $unit;
+	protected $unit;
 
 	/**
 	 * Whether this order has failed
@@ -52,7 +53,7 @@ abstract class Order implements iOrder {
 	protected $transcript;
 
 	public function __construct(
-		$unit= UNIT_ARMY,
+		Unit $unit,
 		\DiplomacyEngine\Empires\Empire $empire,
 		\DiplomacyEngine\Territories\Territory $source,
 		\DiplomacyEngine\Territories\Territory $dest
@@ -98,7 +99,7 @@ abstract class Order implements iOrder {
 		return $this->empire;
 	}
 	public function getEmpire() {
-		return $empire;
+		return $this->empire;
 	}
 
 	public function validate() {
@@ -110,6 +111,13 @@ abstract class Order implements iOrder {
 		}
 	}
 
+	/**
+	 * Return a list of territories that are involved
+	 * in this order.
+	 **/
+	public function territories() {
+		return array($this->source, $this->dest);
+	}
 }
 
 class Move extends Order {
@@ -121,7 +129,7 @@ class Move extends Order {
 	public function __toString() {
 		$str = $this->generateOrder(
 			array('empire', 'unit', 'cmd', 'source', 'dest'),
-			array($this->empire, $this->unit==UNIT_ARMY?'ARMY':'FLEET', $this->cmd, $this->source, $this->dest)
+			array($this->empire, $this->unit->__toString(), $this->cmd, $this->source, $this->dest)
 		);
 
 		return $str;

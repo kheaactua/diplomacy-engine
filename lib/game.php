@@ -99,7 +99,7 @@ class Match implements iMatch {
 		$str .= str_pad('Territory', 30) . str_pad('Empire', 12) . str_pad('Unit', 10) . "\n";
 		$str .= str_pad('', 29, '-') . ' ' . str_pad('', 11, '-') . ' '. str_pad('', 10, '-') . "\n";
 		foreach ($state as $s) {
-			$str .= str_pad($s[0], 30) . str_pad($s[1], 12) . ($s[0]->getUnitType()==UNIT_ARMY?'A':'F') . "\n";
+			$str .= str_pad($s[0], 30) . str_pad($s[1], 12) . $s[0]->getUnit() . "\n";
 		}
 		return $str;
 	}

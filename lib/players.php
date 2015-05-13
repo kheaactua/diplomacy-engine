@@ -5,6 +5,33 @@ namespace DiplomacyEngine\Empires;
 define('UNIT_ARMY', 1);
 define('UNIT_FLEET', 2);
 
+/**
+ * Tiny class for unit type
+ */
+class Unit {
+	protected $type;
+	public function __construct($type = null) {
+		if (strtolower($type) == 'a' || trim(strtolower($type)) == 'army' || $type == UNIT_ARMY)
+			$this->type = UNIT_ARMY;
+		elseif (strtolower($type) == 'f' || trim(strtolower($type)) == 'fleet' || $type == UNIT_FLEET)
+			$this->type = UNIT_FLEET;
+		elseif (is_null($type))
+			$this->type = null;
+		else
+			trigger_error('Must specify unit type, "'. $type .'" provided.');
+	}
+	public function __toString() {
+		switch ($this->type) {
+			case UNIT_ARMY:
+				return "Army";
+			case UNIT_FLEET:
+				return "Fleet";
+			default:
+				return "n/a";
+		}
+	}
+}
+
 interface iEmpire {
 	public function __toString();
 

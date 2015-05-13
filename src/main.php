@@ -1,8 +1,9 @@
 #!/usr/bin/env php
 <?php
 namespace DiplomacyEngine;
-use DiplomacyEngine\Empires\Empire as Empire;
-use DiplomacyEngine\Territories\Territory as Territory;
+use DiplomacyEngine\Empires\Empire;
+use DiplomacyEngine\Empires\Unit;
+use DiplomacyEngine\Territories\Territory;
 use DiplomacyEngine\Orders\Order as Order;
 use DiplomacyEngine\Orders\Move as Move;
 use DiplomacyEngine\Match\Match as Match;
@@ -38,12 +39,14 @@ $territories = Territory::loadTerritories($empires, $t_objs);
 // Empires
 $red = $empires['RED'];
 $blue = $empires['BLU'];
+$green = $empires['GRN'];
 
 // Territories
 $t_a = Territory::findTerritoryByName($territories, 'A');
 $t_b = Territory::findTerritoryByName($territories, 'B');
 $t_c = Territory::findTerritoryByName($territories, 'C');
 $t_d = Territory::findTerritoryByName($territories, 'D');
+$t_e = Territory::findTerritoryByName($territories, 'E');
 
 $match = new Match("The Past", 1812);
 $match->setEmpires($empires);
@@ -52,8 +55,9 @@ $match->start();
 $turn = $match->getCurrentTurn();
 print "\n" . $match ."\n";
 
-$turn->addOrder(new Move(UNIT_ARMY, $red, $t_a, $t_b));
-$turn->addOrder(new Move(UNIT_ARMY, $blue, $t_a, $t_b));
+$turn->addOrder(new Move(new Unit('Army'), $red, $t_a, $t_b));
+$turn->addOrder(new Move(new Unit('Army'), $blue, $t_a, $t_b));
+$turn->addOrder(new Move(new Unit('Army'), $green, $t_e, $t_d));
 $turn->resolveAttacks();
 
 // Show which orders have failed, etc

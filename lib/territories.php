@@ -2,6 +2,7 @@
 
 namespace DiplomacyEngine\Territories;
 use DiplomacyEngine\Empires\Empire as Empire;
+use DiplomacyEngine\Empires\Unit;
 
 /** Terrotory type */
 define('TERR_LAND', 1);
@@ -36,7 +37,7 @@ interface iTerritory {
 	public function isNeighbour(iTerritory $neighbour);
 	public function getNeighbours();
 
-	public function setOccupier(Empire $occupier, $unit);
+	public function setOccupier(Empire $occupier, Unit $unit);
 
 	/** Short name, used as array key, and other non-user stuff */
 	//public function shortName();
@@ -63,7 +64,7 @@ class Territory implements iTerritory {
 		$this->neighbours = array();
 
 		$this->occupier = null;
-		$this->unit = UNIT_ARMY;
+		$this->unit = new Unit();
 
 	}
 	public function __toString() {
@@ -73,7 +74,7 @@ class Territory implements iTerritory {
 	public function getName() { return $this->name; }
 
 	public function getOccupier() { return $this->occupier; }
-	public function getUnitType() { return $this->unit; }
+	public function getUnit() { return $this->unit; }
 
 	/** @return bool Check if $this is land */
 	public function isLand() { return $this->type == TERR_LAND; }
@@ -118,7 +119,7 @@ class Territory implements iTerritory {
 		$this->is_supply = $hasSupply;
 	}
 
-	public function setOccupier(Empire $occupier, $unit) {
+	public function setOccupier(Empire $occupier, Unit $unit) {
 			$this->occupier  = $occupier;
 			$this->unit = $unit;
 	}
@@ -130,7 +131,7 @@ class Territory implements iTerritory {
 			$t->setSupplyCenter($obj->has_supply);
 
 			if (array_key_exists($obj->empire_start, $empires)) {
-				$t->setOccupier($empires[$obj->empire_start], $obj->starting_forces);
+				$t->setOccupier($empires[$obj->empire_start], new Unit($obj->starting_forces));
 			};
 
 			$ts[$t->getId()] = $t;
