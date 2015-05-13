@@ -72,6 +72,7 @@ class Turn implements iTurn {
 			if (!array_key_exists($o->source->getId(), $sources))
 				$sources[$o->source->getId()] = array();
 
+// TODO make exception for CONVOYS
 			$sources[$o->source->getId()][] = $o;
 		}
 		foreach ($sources as $orders) {

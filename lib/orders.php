@@ -106,6 +106,7 @@ abstract class Order implements iOrder {
 		if ($this->failed()) return false;
 
 		// Does the empire own the source territory
+// TODO make exception for CONVOYS
 		if ($this->source->getOccupier() != $this->empire) {
 			$this->fail("$this->empire does not occupy $this->source");
 		}
