@@ -219,6 +219,30 @@ class Turn implements iTurn {
 			print "\n";
 		}
 
+		// Determine required retreats.  Go through the resolutions, and find all
+		// occupiers who are not the winners
+		$retreats = array();
+		foreach ($ters as $t_id=>&$map) {
+			$t = $map['territory'];
+			$winner = $map['tally']->winner();
+
+			if (is_null($winner)) continue;
+
+			if ($t->getOccupier() != $winner) {
+				$retreats[] = array('territory' => $t, 'empire' => $t->getOccupier(), 'winner' => $winner);
+			}
+		}
+
+		// Debug, move to a function later or something.
+		if (count($retreats)) {
+			print "\nRequired Retreats!\n";
+			foreach ($retreats as $arr) {
+				print "{$arr['territory']} {$arr['empire']} must retreat due to $winner's victory.\n";
+			}
+		} else {
+			print "No retreats required.\n";
+		}
+		print "\n";
 
 	}
 
