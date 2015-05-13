@@ -58,13 +58,27 @@ class Turn implements iTurn {
 
 	/** While orders should be validated before even being assigned
 	 * to a turn, run this just in case.  This will call order->Validate
-	 * which will ensure that all the parameters in an order make sense */
+	 * which will ensure that all the parameters in an order make sense.
+	 *
+	 * It'll also ensure that no two orders have the same source.  Any
+	 * orders originating from the same place are all invalidated.
+	 * */
 	protected function validateOrders() {
-		//$old = $this->match>getTerritories();
-		//$this->territories=array();
+		$sources = array();
 		foreach ($this->orders as &$o) {
-			if (!$o->validate()) {
-			  //$o->fail('Invalid');
+			$o->validate();
+
+			if ($o->failed()) continue;
+			if (!array_key_exists($o->source->getId(), $sources))
+				$sources[$o->source->getId()] = array();
+
+			$sources[$o->source->getId()][] = $o;
+		}
+		foreach ($sources as $orders) {
+			if (count($orders) > 1) {
+				foreach ($orders as &$o) {
+					$o->fail("Order conflicts with '". join("', '", $orders) . "'");
+				}
 			}
 		}
 	}
