@@ -58,6 +58,25 @@
 		</behavior>
 	</table>
 
+	<table name="empire_order" phpName="Order" description="Saves the orders of each turn.  Required because there is a break in the process between initial orders and required retreats.">
+		<column name="match_id" type="integer" />
+		<column name="turn_id" type="integer" primaryKey="true" autoIncrement="true" />
+
+		<column name="id" type="varchar" size="10" required="true" primaryKey="true"/>
+		<column name="command" type="varchar" size="100" required="true" description="Full order/command text." />
+		<column name="status" type="enum" valueSet="succeeded,failed" />
+		<column name="transcript" type="longvarchar" description="Transcript of this order" />
+		<foreign-key foreignTable="match" onDelete="CASCADE">
+			<reference local="match_id" foreign="id" />
+		</foreign-key>
+		<foreign-key foreignTable="turn" onDelete="CASCADE">
+			<reference local="turn_id" foreign="id" />
+		</foreign-key>
+		<foreign-key foreignTable="empire" onDelete="CASCADE">
+			<reference local="empire_id" foreign="id" />
+		</foreign-key>
+	</table>
+
 	<table name="territory">
 		<column name="game_id" type="integer" />
 		<column name="territory_id" type="integer" primaryKey="true" autoIncrement="true" />
