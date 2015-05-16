@@ -1,34 +1,54 @@
 #!/usr/bin/env php
 <?php
-namespace DiplomacyEngine;
-#use DiplomacyEngine\Empires\Empire;
+//use DiplomacyEngine\Empires\Empire;
+//use DiplomacyEngine\Territories\Territory;
+//use DiplomacyEngine\Match\Match as Match;
+// use DiplomacyEngine\Orders\Order as Order;
+// use DiplomacyEngine\Orders\Move as Move;
+// use DiplomacyEngine\Orders\Support as Support;
+
 use DiplomacyOrm\Empire;
+use DiplomacyOrm\EmpireQuery;
 use DiplomacyEngine\Empires\Unit;
-use DiplomacyEngine\Territories\Territory;
-use DiplomacyEngine\Orders\Order as Order;
-use DiplomacyEngine\Orders\Move as Move;
-use DiplomacyEngine\Orders\Support as Support;
-use DiplomacyEngine\Match\Match as Match;
+use DiplomacyOrm\TerritoryTemplate;
+use DiplomacyOrm\TerritoryTemplateQuery;
+use DiplomacyOrm\Match;
+use DiplomacyOrm\Game;
+use DiplomacyOrm\GameQuery;
+
+use DiplomacyOrm\Move;
+use DiplomacyOrm\Support;
 
 require_once( __DIR__ . '/../config/config.php');
 
+// Clear the DB first
+use Propel\Runtime\Propel;
+$con = Propel::getWriteConnection(DiplomacyOrm\Map\GameTableMap::DATABASE_NAME);
+$sql = "DELETE FROM game";
+$stmt = $con->prepare($sql);
+$stmt->execute();
 
-//$canada = new Territory('Canada');
-//$usa    = new Territory('USA');
 
-//$move = new Move($empire, $canada, $usa);
-//print "Created '$move'\n";
+// Create or use
+$game = null;
+$games = GameQuery::create()->findByName('test');
+if (count($games) == 1) {
+	$game = $games[0];
+} elseif (!count($games)) {
+	$game_name = 'test';
+	$p_objs = json_decode(file_get_contents($config->host->data . "/$game_name/empires.json"), false);
+	$t_objs = json_decode(file_get_contents($config->host->data . "/$game_name/territories.json"), false);
 
 
-// Create Terriroties
-//$t_objs = json_decode(file_get_contents('territories-real.json'), false);
+	$game = Game::create($game_name, 1861, 'spring');
+	$game->loadEmpires($p_objs);
+	$game->loadTerritories($t_objs);
 
-// Create empires
-$p_objs = json_decode(file_get_contents('empires-test.json'), false);
-$empires = Empire::loadEmpires($p_objs);
+	$game->save();
+} else {
+	trigger_error("A duplicate got created!");
+}
 
-$t_objs = json_decode(file_get_contents('territories-test.json'), false);
-$territories = Territory::loadTerritories($empires, $t_objs);
 
 // $texas   = Territory::findTerritoryByName($territories, 'Texas');
 // $sequoia = Territory::findTerritoryByName($territories, 'Sequoia');
@@ -39,20 +59,18 @@ $territories = Territory::loadTerritories($empires, $t_objs);
 // print "Texas-Ohio? "    . ($texas->isNeighbour($ohio) ? 'FAIL':'PASS') . "\n";
 
 // Empires
-$red = $empires['RED'];
-$blue = $empires['BLU'];
-$green = $empires['GRN'];
+$red   = EmpireQuery::create()->findPk('RED');
+$blue  = EmpireQuery::create()->findPk('BLU');
+$green = EmpireQuery::create()->findPk('GRN');
 
 // Territories
-$t_a = Territory::findTerritoryByName($territories, 'A');
-$t_b = Territory::findTerritoryByName($territories, 'B');
-$t_c = Territory::findTerritoryByName($territories, 'C');
-$t_d = Territory::findTerritoryByName($territories, 'D');
-$t_e = Territory::findTerritoryByName($territories, 'E');
+$t_a = TerritoryTemplateQuery::create()->findByName('A');
+$t_b = TerritoryTemplateQuery::create()->findByName('B');
+$t_c = TerritoryTemplateQuery::create()->findByName('C');
+$t_d = TerritoryTemplateQuery::create()->findByName('D');
+$t_e = TerritoryTemplateQuery::create()->findByName('E');
 
 $match = new Match("The Past", 1812);
-$match->setEmpires($empires);
-$match->setTerritories($territories);
 $match->start();
 $turn = $match->getCurrentTurn();
 print "\n" . $match ."\n";

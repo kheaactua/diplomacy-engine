@@ -26,16 +26,16 @@ interface iTerritory {
 	public function getType();
 	public function setType($type);
 
-	public function addNeighbour(iTerritory $neighbour);
-	public function addNeighbours(array $neighbours);
+	// public function addNeighbour(iTerritory $neighbour);
+	// public function addNeighbours(array $neighbours);
+	//public function getNeighbours();
+	public function isNeighbour(iTerritory $neighbour);
 
 
 	/** @return bool Has Supply center */
 	public function getIsSupplyCenter();
 	public function setIsSupplyCenter($hasSupply);
 
-	public function isNeighbour(iTerritory $neighbour);
-	public function getNeighbours();
 
 	public function setOccupier(Empire $occupier, Unit $unit);
 
@@ -123,7 +123,7 @@ class Territory implements iTerritory {
 			$this->unit = $unit;
 	}
 
-	public static function loadTerritories(array $empires, array $objs) {
+	public static function loadTerritories(iGame $game, array $empires, array $objs) {
 		$ts = array();
 		foreach ($objs as $obj) {
 			$t = new Territory($obj->id, $obj->name, $obj->type);

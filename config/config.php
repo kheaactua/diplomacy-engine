@@ -8,6 +8,8 @@ $config->system = new \Configurator\Constants($MLOG);
 // This will define $config->host
 require_once("host.config.php");
 
+$config->host->data = $config->host->BASE_DIR . '/games';
+
 // Turn error reporting on, since the server shut it off..
 error_reporting(E_ALL);
 
@@ -18,12 +20,7 @@ date_default_timezone_set('America/New_York');
 use Propel\Runtime\Propel;
 use Propel\Runtime\Connection\ConnectionManagerSingle;
 
-// $serviceContainer = Propel::getServiceContainer();
-// $serviceContainer->setAdapterClass('diplomacy', 'mysql');
-// $manager = new ConnectionManagerSingle();
-
-require_once '../orm/conf/config.php';
-// $serviceContainer->setConnectionManager('diplomacy', $manager);
+require_once $config->host->BASE_DIR . '/orm/conf/config.php';
 
 // Set up logging
 use Monolog\Logger;

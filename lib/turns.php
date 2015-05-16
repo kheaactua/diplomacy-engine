@@ -9,7 +9,7 @@ use DiplomacyEngine\Orders;
 
 interface iTurn {
 	/** Add a empire */
-	public function addOrder(Order $order);
+	//public function addOrder(Order $order);
 
 	/** Resolves all the orders in this turn, and determine
 	 * who needs to retreat */

@@ -2,6 +2,7 @@
 
 namespace DiplomacyEngine\Empires;
 
+
 define('UNIT_ARMY', 1);
 define('UNIT_FLEET', 2);
 
