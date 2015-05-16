@@ -1,23 +1,23 @@
 {
-    "name": "matt/diplomacy-engine",
-    "description": "Diplomacy order resolving engine",
-    "require": {
-        "php": ">=5.3.0",
-        "monolog/monolog": ">=1.0",
-        "kheaactua/configurator": "dev-master"
-    },
-    "minimum-stability": "dev",
-    "require-dev": {
-        "propel/propel-bundle": "~2.0@dev"
-    },
-    "autoload": {
-        "classmap": ["src/", "lib/"]
-    },
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Matthew Russell",
-            "email": "matthew.g.russell@gmail.com"
-        }
-    ]
+	"name": "matt/diplomacy-engine",
+	"description": "Diplomacy order resolving engine",
+	"require": {
+		"php": ">=5.3.0",
+		"monolog/monolog": ">=1.0",
+		"kheaactua/configurator": ">=0.2.0"
+	},
+	"minimum-stability": "dev",
+	"require-dev": {
+		"propel/propel-bundle": "~2.0@dev"
+	},
+	"autoload": {
+		"classmap": ["src/", "lib/", "orm/classes/DiplomacyOrm"]
+	},
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "Matthew Russell",
+			"email": "matthew.g.russell@gmail.com"
+		}
+	]
 }
