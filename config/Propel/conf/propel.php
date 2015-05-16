@@ -26,11 +26,12 @@ return [
 			'connections'       => ['diplomacy']
 		],
 		'paths' => [
-			'schemaDir' => "$orm/sql",
-			'outputDir' => "$orm/classes",
-			'phpDir'    => "$orm/classes",
+			'schemaDir'    => "$orm/sql",
+			'outputDir'    => "$orm/classes",
+			'phpDir'       => "$orm/classes",
+			'phpConfDir'   => "$orm/conf",
 			'migrationDir' => "$orm/migrations",
-			'sqlDir'    => "$orm/sql",
+			'sqlDir'       => "$orm/sql",
 		],
 	]
 ];
