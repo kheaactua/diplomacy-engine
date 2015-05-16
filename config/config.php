@@ -18,20 +18,12 @@ date_default_timezone_set('America/New_York');
 use Propel\Runtime\Propel;
 use Propel\Runtime\Connection\ConnectionManagerSingle;
 
-$serviceContainer = Propel::getServiceContainer();
-$serviceContainer->setAdapterClass('diplomacy', 'mysql');
-$manager = new ConnectionManagerSingle();
-// The constants below are set in hosts.config.php
-// Not sure why this no longer uses
-// Propel::init(MAYO_MASTER_DIR . "/orm/build/conf/mayofest-conf.php");
-$manager->setConfiguration(array (
-	'dsn'      => $config->host->db->dsn,
-	'user'     => 'www',
-	'password' => $config->host->db->pass,
-));
-// Replace that with
-// require_once '/generated-conf/config.php';
-$serviceContainer->setConnectionManager('mayofest', $manager);
+// $serviceContainer = Propel::getServiceContainer();
+// $serviceContainer->setAdapterClass('diplomacy', 'mysql');
+// $manager = new ConnectionManagerSingle();
+
+require_once '../orm/conf/config.php';
+// $serviceContainer->setConnectionManager('diplomacy', $manager);
 
 // Set up logging
 use Monolog\Logger;
@@ -44,7 +36,7 @@ Propel::getServiceContainer()->setLogger('defaultLogger', $MLOG);
 $config->setLog($MLOG);
 
 // Query logging
-$con = Propel::getWriteConnection(\DiplomacyOrm\Map\UserTableMap::DATABASE_NAME);
+$con = Propel::getWriteConnection(\DiplomacyOrm\Map\GameTableMap::DATABASE_NAME);
 $config->system->db = $con; // It's been annoying to retrive this everywhere..
 //$con->useDebug(true);
 
