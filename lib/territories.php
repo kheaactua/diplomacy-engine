@@ -1,7 +1,7 @@
 <?php
 
 namespace DiplomacyEngine\Territories;
-use DiplomacyEngine\Empires\Empire as Empire;
+use DiplomacyEngine\Empires\iEmpire as Empire;
 use DiplomacyEngine\Empires\Unit;
 
 /** Terrotory type */
@@ -11,7 +11,7 @@ define('TERR_WATER', 2);
 interface iTerritory {
 	public function __toString();
 
-	public function getId();
+	public function getTerritoryId();
 
 	/** @return bool Check if $this is land */
 	public function isLand();
@@ -23,7 +23,7 @@ interface iTerritory {
 	public function isWater();
 
 	/** @return int Return the territory type (IS_LAND, IS_COAST, IS_WATER) */
-	public function type();
+	public function getType();
 	public function setType($type);
 
 	public function addNeighbour(iTerritory $neighbour);
@@ -31,8 +31,8 @@ interface iTerritory {
 
 
 	/** @return bool Has Supply center */
-	public function hasSupplyCenter();
-	public function setSupplyCenter($hasSupply);
+	public function getIsSupplyCenter();
+	public function setIsSupplyCenter($hasSupply);
 
 	public function isNeighbour(iTerritory $neighbour);
 	public function getNeighbours();
@@ -45,7 +45,6 @@ interface iTerritory {
 	//public static function createTerritories(array $map);
 }
 
-// going to be replaced with a propel class
 class Territory implements iTerritory {
 	public $name;
 	protected $type;
@@ -70,7 +69,7 @@ class Territory implements iTerritory {
 	public function __toString() {
 		return $this->name;
 	}
-	public function getId() { return $this->id; }
+	public function getTerritoryId() { return $this->id; }
 	public function getName() { return $this->name; }
 
 	public function getOccupier() { return $this->occupier; }
@@ -83,7 +82,7 @@ class Territory implements iTerritory {
 	public function isWater() { return $this->type == TERR_WATER; }
 
 	/** @return int Return the territory type (IS_LAND, IS_COAST, IS_WATER) */
-	public function type() { return $this->type; }
+	public function getType() { return $this->type; }
 	public function setType($type) {
 		if ($type == TERR_LAND || $type == TERR_WATER) {
 			$this->type = $type;
@@ -97,8 +96,8 @@ class Territory implements iTerritory {
 	}
 
 	public function addNeighbour(iTerritory $neighbour) {
-		if (!array_key_exists($neighbour->getId(), $this->neighbours)) {
-			$this->neighbours[$neighbour->getId()] = $neighbour;
+		if (!array_key_exists($neighbour->getTerritoryId(), $this->neighbours)) {
+			$this->neighbours[$neighbour->getTerritoryId()] = $neighbour;
 
 			// The check above should prevent this from being an infinite loop
 			$neighbour->addNeighbour($this);
@@ -108,14 +107,14 @@ class Territory implements iTerritory {
 		trigger_error('Not implemented');
 	}
 	public function isNeighbour(iTerritory $neighbour) {
-		return array_key_exists($neighbour->getId(), $this->neighbours);
+		return array_key_exists($neighbour->getTerritoryId(), $this->neighbours);
 	}
 	public function getNeighbours() { return $this->neighbours; }
 
 
 	/** @return bool Has Supply center */
-	public function hasSupplyCenter() { return $this->is_supply; }
-	public function setSupplyCenter($hasSupply) {
+	public function getIsSupplyCenter() { return $this->is_supply; }
+	public function setIsSupplyCenter($hasSupply) {
 		$this->is_supply = $hasSupply;
 	}
 
@@ -128,13 +127,13 @@ class Territory implements iTerritory {
 		$ts = array();
 		foreach ($objs as $obj) {
 			$t = new Territory($obj->id, $obj->name, $obj->type);
-			$t->setSupplyCenter($obj->has_supply);
+			$t->setIsSupplyCenter($obj->has_supply);
 
 			if (array_key_exists($obj->empire_start, $empires)) {
 				$t->setOccupier($empires[$obj->empire_start], new Unit($obj->starting_forces));
 			};
 
-			$ts[$t->getId()] = $t;
+			$ts[$t->getTerritoryId()] = $t;
 		}
 
 		// Second pass, set up neighbours
@@ -147,7 +146,7 @@ class Territory implements iTerritory {
 		}
 		return $ts;
 	}
-	public function findTerritoryByName($territories, $name) {
+	public static function findTerritoryByName($territories, $name) {
 		foreach ($territories as $t) {
 			if ($t->getName() == $name) {
 				return $t;

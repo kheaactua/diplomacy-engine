@@ -1,7 +1,8 @@
 #!/usr/bin/env php
 <?php
 namespace DiplomacyEngine;
-use DiplomacyEngine\Empires\Empire;
+#use DiplomacyEngine\Empires\Empire;
+use DiplomacyOrm\Empire;
 use DiplomacyEngine\Empires\Unit;
 use DiplomacyEngine\Territories\Territory;
 use DiplomacyEngine\Orders\Order as Order;
@@ -72,7 +73,6 @@ switch ($case) {
 		$turn->addOrder(new Support(new Unit('Army'), $green, $red, $t_e, $t_b));
 		break;
 }
-
 
 $turn->resolveAttacks();
 

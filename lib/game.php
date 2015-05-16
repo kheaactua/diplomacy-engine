@@ -85,7 +85,7 @@ class Match implements iMatch {
 	public function state() {
 		$state = array();
 		foreach ($this->territories as $t) {
-			$state[$t->getId()] = array($t, $t->getOccupier());
+			$state[$t->getTerritoryId()] = array($t, $t->getOccupier());
 		}
 		return $state;
 	}

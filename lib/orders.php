@@ -2,6 +2,8 @@
 
 namespace DiplomacyEngine\Orders;
 use DiplomacyEngine\Empires\Unit;
+use DiplomacyEngine\Empires\iEmpire as Empire;
+use \DiplomacyEngine\Territories\iTerritory as Territory;
 
 interface iOrder  {
 	/** Returns the string representation of the order */
@@ -54,9 +56,9 @@ abstract class Order implements iOrder {
 
 	public function __construct(
 		Unit $unit,
-		\DiplomacyEngine\Empires\Empire $empire,
-		\DiplomacyEngine\Territories\Territory $source,
-		\DiplomacyEngine\Territories\Territory $dest
+		Empire $empire,
+		Territory $source,
+		Territory $dest
 	) {
 		$this->unit= $unit;
 		$this->empire = $empire;
@@ -146,10 +148,10 @@ class Support extends Order {
 
 	public function __construct(
 		Unit $unit,
-		\DiplomacyEngine\Empires\Empire $empire,
-		\DiplomacyEngine\Empires\Empire $aly,
-		\DiplomacyEngine\Territories\Territory $source,
-		\DiplomacyEngine\Territories\Territory $dest
+		Empire $empire,
+		Empire $aly,
+		Territory $source,
+		Territory $dest
 	) {
 		parent::__construct($unit, $empire, $source, $dest);
 		$this->aly = $aly;

@@ -69,11 +69,11 @@ class Turn implements iTurn {
 			$o->validate();
 
 			if ($o->failed()) continue;
-			if (!array_key_exists($o->source->getId(), $sources))
-				$sources[$o->source->getId()] = array();
+			if (!array_key_exists($o->source->getTerritoryId(), $sources))
+				$sources[$o->source->getTerritoryId()] = array();
 
 // TODO make exception for CONVOYS
-			$sources[$o->source->getId()][] = $o;
+			$sources[$o->source->getTerritoryId()][] = $o;
 		}
 		foreach ($sources as $orders) {
 			if (count($orders) > 1) {
@@ -132,14 +132,14 @@ class Turn implements iTurn {
 		$ters = $this->getActiveTerritories();
 
 		foreach ($ters as &$t) {
-			$ret[$t->getId()] = array('territory' => $t, 'orders' => array(), 'tally' => new PlayerMap($t->getOccupier()));
+			$ret[$t->getTerritoryId()] = array('territory' => $t, 'orders' => array(), 'tally' => new PlayerMap($t->getOccupier()));
 
 			foreach ($this->orders as &$o) {
 				$affected = $o->territories();
 				foreach ($affected as $t2) {
 					if ($t2 == $t) {
 						if (!$include_failed && $o->failed()) continue;
-						$ret[$t->getId()]['orders'][] = $o;
+						$ret[$t->getTerritoryId()]['orders'][] = $o;
 					}
 				}
 			}
@@ -291,11 +291,11 @@ class PlayerMap {
 		}
 	}
 	public function inc(Empire $empire) {
-		if (!array_key_exists($empire->getId(), $this->map))
-			$this->map[$empire->getId()] = array('tally' => 0, 'empire' => $empire);
+		if (!array_key_exists($empire->getEmpireId(), $this->map))
+			$this->map[$empire->getEmpireId()] = array('tally' => 0, 'empire' => $empire);
 
 //print "Incrementing $empire\n";
-		$this->map[$empire->getId()]['tally']++;
+		$this->map[$empire->getEmpireId()]['tally']++;
 	}
 	public function findWinner() {
 		$c = -1;

@@ -33,10 +33,11 @@ class Unit {
 }
 
 interface iEmpire {
+	/** Serialize to string **/
 	public function __toString();
 
 	/** Empire ID **/
-	public function getId();
+	public function getEmpireId();
 }
 
 // going to be replaced with a propel class
@@ -57,7 +58,7 @@ class Empire implements iEmpire {
 		return $this->id;
 	}
 
-	public function getId() {
+	public function getEmpireId() {
 		return $this->id;
 	}
 
@@ -66,7 +67,7 @@ class Empire implements iEmpire {
 		foreach ($objs as $obj) {
 			$t = new Empire($obj->id, $obj->name_official, $obj->name_long, $obj->name_short);
 			$empires[$t->getId()] = $t;
-		}	
+		}
 		return $empires;
 	}
 
