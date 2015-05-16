@@ -1,23 +1,23 @@
-
 <?xml version="1.0" encoding="UTF-8"?>
+
 <database name="diplomacy" defaultIdMethod="native" namespace="DiplomacyOrm">
 
 	<table name="game">
-		<column name="id" type="integer" required="true" primaryKey="true" autoIncrement="true"/>
-		<column name="name" type="varchar" size="100" required="true" autoIncrement="true"/>
-		<column name="start_year" type="integer" required="true" autoIncrement="true"/>
-		<column name="start_season" type="ENUM" valueSet="spring,winter" default="spring"/>
+		<column name="game_id" type="integer" required="true" primaryKey="true" autoIncrement="true" />
+		<column name="name" type="varchar" size="150" required="true" />
+		<column name="start_year" type="integer" required="true" />
+		<column name="start_season" type="ENUM" valueSet="spring,winter" default="spring" />
 	</table>
 
 	<table name="empire">
-		<column name="game_id" type="integer" />
-		<column name="id" type="varchar" required="true" primaryKey="true"/>
+		<column name="game_id" type="integer" primaryKey="true" />
+		<column name="empire_id" type="varchar" size="10" required="true" primaryKey="true"/>
 		<column name="name_official" type="varchar" size="100" required="true" />
 		<column name="name_long" type="varchar" size="100" required="true" />
 		<column name="name_short" type="varchar" size="10" required="true" />
 
 		<foreign-key foreignTable="game" onDelete="CASCADE">
-			<reference local="game_id" foreign="id" />
+			<reference local="game_id" foreign="game_id" />
 		</foreign-key>
 	</table>
 
@@ -28,7 +28,7 @@
 		<column name="updated_at" type="timestamp" />
 
 		<foreign-key foreignTable="game" onDelete="CASCADE">
-			<reference local="game_id" foreign="id" />
+			<reference local="game_id" foreign="game_id" />
 		</foreign-key>
 
 		<behavior name="timestampable">
@@ -49,7 +49,7 @@
 		<column name="transcript" type="longvarchar" required="false" description="Full transcript of the orders that are executed in this turn" />
 
 		<foreign-key foreignTable="match" onDelete="CASCADE">
-			<reference local="match_id" foreign="id" />
+			<reference local="match_id" foreign="match_id" />
 		</foreign-key>
 
 		<behavior name="timestampable">
@@ -61,19 +61,20 @@
 	<table name="empire_order" phpName="Order" description="Saves the orders of each turn.  Required because there is a break in the process between initial orders and required retreats.">
 		<column name="match_id" type="integer" />
 		<column name="turn_id" type="integer" primaryKey="true" autoIncrement="true" />
+		<column name="empire_id" type="varchar" size="10" required="true" />
 
-		<column name="id" type="varchar" size="10" required="true" primaryKey="true"/>
+		<column name="order_id" type="varchar" size="10" required="true" primaryKey="true"/>
 		<column name="command" type="varchar" size="100" required="true" description="Full order/command text." />
 		<column name="status" type="enum" valueSet="succeeded,failed" />
 		<column name="transcript" type="longvarchar" description="Transcript of this order" />
 		<foreign-key foreignTable="match" onDelete="CASCADE">
-			<reference local="match_id" foreign="id" />
+			<reference local="match_id" foreign="match_id" />
 		</foreign-key>
 		<foreign-key foreignTable="turn" onDelete="CASCADE">
-			<reference local="turn_id" foreign="id" />
+			<reference local="turn_id" foreign="turn_id" />
 		</foreign-key>
 		<foreign-key foreignTable="empire" onDelete="CASCADE">
-			<reference local="empire_id" foreign="id" />
+			<reference local="empire_id" foreign="empire_id" />
 		</foreign-key>
 	</table>
 
@@ -85,29 +86,29 @@
 		<column name="is_supply"  type="char" size="1" default="0" description="True (1) if this territory is a supply base" />
 
 		<foreign-key foreignTable="game" onDelete="CASCADE">
-			<reference local="game_id" foreign="id" />
+			<reference local="game_id" foreign="game_id" />
 		</foreign-key>
 	</table>
 
-	<table name="state" isCrossRef="true" description="Contains the game state at every turn">
-		<column name="match_id" type="integer" required="true" primaryKey="true" />
-		<column name="turn_id" type="integer" required="true" primaryKey="true" />
+	<table name="match_state" phpName="State" isCrossRef="true" description="Contains the match state for every turn">
+		<column name="match_id"     type="integer" required="true" primaryKey="true" />
+		<column name="turn_id"      type="integer" required="true" primaryKey="true" />
 		<column name="territory_id" type="integer" required="true" primaryKey="true" />
 
-		<column name="occupier_id" type="integer" description="Occupying empire" />
+		<column name="occupier_id" type="varchar" size="10" description="Occupying empire" />
 		<column name="unit" type="enum" valueSet="army,fleet,none" description="Occupying unit.  Only none if occpupier_id is empty." />
 
 		<foreign-key foreignTable="match" onDelete="CASCADE">
-			<reference local="match_id" foreign="id" />
+			<reference local="match_id" foreign="match_id" />
 		</foreign-key>
 		<foreign-key foreignTable="turn" onDelete="CASCADE">
-			<reference local="turn_id" foreign="id" />
+			<reference local="turn_id" foreign="turn_id" />
 		</foreign-key>
 		<foreign-key foreignTable="territory" onDelete="CASCADE">
-			<reference local="territory_id" foreign="id" />
+			<reference local="territory_id" foreign="territory_id" />
 		</foreign-key>
 		<foreign-key foreignTable="empire" onDelete="CASCADE">
-			<reference local="occupier_id" foreign="id" />
+			<reference local="occupier_id" foreign="empire_id" />
 		</foreign-key>
 	</table>
 
@@ -115,16 +116,16 @@
 	<table name="neighbour" isCrossRef="true" description="Contains the neibour information for each territory.  One row for every connection.">
 		<column name="game_id" type="integer" required="true" primaryKey="true" />
 		<foreign-key foreignTable="game" onDelete="CASCADE">
-			<reference local="game_id" foreign="id" />
+			<reference local="game_id" foreign="game_id" />
 		</foreign-key>
 
 		<column name="territory_a_id" type="integer" required="true" primaryKey="true" />
 		<column name="territory_b_id" type="integer" required="true" primaryKey="true" />
-		<foreign-key foreignTable="territory_a" onDelete="CASCADE">
-			<reference local="territory_a_id" foreign="id" />
+		<foreign-key foreignTable="territory" phpName="TerritoryA" onDelete="CASCADE">
+			<reference local="territory_a_id" foreign="territory_id" />
 		</foreign-key>
-		<foreign-key foreignTable="territory_b" onDelete="CASCADE">
-			<reference local="territory_b_id" foreign="id" />
+		<foreign-key foreignTable="territory" phpName="TerritoryB" onDelete="CASCADE">
+			<reference local="territory_b_id" foreign="territory_id" />
 		</foreign-key>
 	</table>
 
