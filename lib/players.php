@@ -1,6 +1,6 @@
 <?php
 
-namespace DiplomacyEngine\Empires;
+namespace DiplomacyEngine;
 use DiplomacyOrm\Map\StateTableMap;
 
 // Deprecated

@@ -9,7 +9,7 @@
 
 use DiplomacyOrm\Empire;
 use DiplomacyOrm\EmpireQuery;
-use DiplomacyEngine\Empires\Unit;
+use DiplomacyEngine\Unit;
 use DiplomacyOrm\TerritoryTemplate;
 use DiplomacyOrm\TerritoryTemplateQuery;
 use DiplomacyOrm\Map\TerritoryTemplateTableMap;

@@ -1,9 +1,8 @@
 <?php
 
-namespace DiplomacyEngine\Orders;
-use DiplomacyEngine\Empires\Unit;
-use DiplomacyEngine\Empires\iEmpire as Empire;
-use \DiplomacyEngine\Territories\iTerritory as Territory;
+namespace DiplomacyEngine;
+use DiplomacyEngine\Unit;
+use DiplomacyEngine\iEmpire as Empire;
 
 interface iOrder  {
 	/** Returns the string representation of the order */

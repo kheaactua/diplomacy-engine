@@ -1,10 +1,10 @@
 <?php
 
-namespace DiplomacyEngine\Turns;
+namespace DiplomacyEngine;
 
-use DiplomacyEngine\Match\iMatch as Match;
-use DiplomacyEngine\Empires\iEmpire as Empire;
-use DiplomacyEngine\Orders\iOrder as Order;
+use DiplomacyEngine\iMatch as Match;
+use DiplomacyEngine\iEmpire as Empire;
+use DiplomacyEngine\iOrder as Order;
 use DiplomacyEngine\Orders;
 
 interface iTurn {

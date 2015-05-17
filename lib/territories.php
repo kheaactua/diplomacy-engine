@@ -1,8 +1,8 @@
 <?php
 
-namespace DiplomacyEngine\Territories;
-use DiplomacyEngine\Empires\iEmpire as Empire;
-use DiplomacyEngine\Empires\Unit;
+namespace DiplomacyEngine;
+use DiplomacyEngine\iEmpire as Empire;
+use DiplomacyEngine\Unit;
 
 /** Terrotory type */
 define('TERR_LAND', 1);
