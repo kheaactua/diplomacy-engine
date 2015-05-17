@@ -64,9 +64,10 @@ if (count($games) == 1) {
 // print "Texas-Ohio? "    . ($texas->isNeighbour($ohio) ? 'FAIL':'PASS') . "\n";
 
 // Empires
-$red   = EmpireQuery::create()->filterByGame($game)->filterByName('RED')->findOne();
-$blue  = EmpireQuery::create()->filterByGame($game)->filterByName('BLU')->findOne();
-$green = EmpireQuery::create()->filterByGame($game)->filterByName('GRN')->findOne();
+//$config->system->db->useDebug(true);
+$red   = EmpireQuery::create()->filterByGame($game)->filterByAbbr('RED')->findOne();
+$blue  = EmpireQuery::create()->filterByGame($game)->filterByAbbr('BLU')->findOne();
+$green = EmpireQuery::create()->filterByGame($game)->filterByAbbr('GRN')->findOne();
 
 
 $match = Match::create($game, "Matt Test");
@@ -76,7 +77,6 @@ print "\n" . $match ."\n";
 // Territories
 // Crate the $t_<territory> magic variables.
 $t_names=array('A', 'B', 'C', 'D', 'E');
-//$config->system->db->useDebug(true);
 foreach ($t_names as $n) {
 	$c = new Criteria; $c->add(TerritoryTemplateTableMap::COL_NAME, $n);
 	$tt = $game->getGameTerritories($c);
@@ -84,23 +84,23 @@ foreach ($t_names as $n) {
 	$$varname = StateQuery::create()->filterByTerritory($tt)->findOne();
 }
 
-exit;
 $case = 2;
 switch ($case) {
 	case 1;
 		// Test move conflict
-		$turn->addOrder(Move::create(new Unit('Army'),  $red,    $t_a,  $t_b));
-		$turn->addOrder(Move::create(new Unit('Army'),  $red,    $t_a,  $t_c));
-		$turn->addOrder(Move::create(new Unit('Army'),  $blue,   $t_a,  $t_b));
-		$turn->addOrder(Move::create(new Unit('Army'),  $green,  $t_e,  $t_d));
+		$turn->addOrder(Move::createNS($red,    new Unit('Army'),  $t_a,  $t_b));
+		$turn->addOrder(Move::createNS($red,    new Unit('Army'),  $t_a,  $t_c));
+		$turn->addOrder(Move::createNS($blue,   new Unit('Army'),  $t_a,  $t_b));
+		$turn->addOrder(Move::createNS($green,  new Unit('Army'),  $t_e,  $t_d));
 		break;
 	case 2;
 		// Test support
-		$turn->addOrder(Move::create(new Unit('Army'),  $red,    $t_a,  $t_b));
-		$turn->addOrder(Move::create(new Unit('Army'),  $blue,   $t_a,  $t_b));
-		$turn->addOrder(Move::create(new Unit('Army'),  $green,  $red,  $t_e, $t_b));
+		$turn->addOrder(Move::createNS($red,       new Unit('Army'),  $t_a,              $t_b));
+		$turn->addOrder(Move::createNS($blue,      new Unit('Army'),  $t_a,              $t_b));
+		$turn->addOrder(Support::createNS($green,  $red,              new Unit('Army'),  $t_e,    $t_b));
 		break;
 }
+$turn->save();
 
 $turn->resolveAttacks();
 

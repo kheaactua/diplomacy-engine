@@ -88,8 +88,6 @@ class Empire implements iEmpire {
 		}
 		return $empires;
 	}
-
-
 }
 
 // vim: ts=3 sw=3 noet :
