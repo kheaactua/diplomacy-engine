@@ -12,12 +12,17 @@ use DiplomacyOrm\EmpireQuery;
 use DiplomacyEngine\Empires\Unit;
 use DiplomacyOrm\TerritoryTemplate;
 use DiplomacyOrm\TerritoryTemplateQuery;
+use DiplomacyOrm\Map\TerritoryTemplateTableMap;
 use DiplomacyOrm\Match;
+use DiplomacyOrm\State;
+use DiplomacyOrm\StateQuery;
 use DiplomacyOrm\Game;
 use DiplomacyOrm\GameQuery;
 
 use DiplomacyOrm\Move;
 use DiplomacyOrm\Support;
+
+use Propel\Runtime\ActiveQuery\Criteria;
 
 require_once( __DIR__ . '/../config/config.php');
 
@@ -59,36 +64,41 @@ if (count($games) == 1) {
 // print "Texas-Ohio? "    . ($texas->isNeighbour($ohio) ? 'FAIL':'PASS') . "\n";
 
 // Empires
-$red   = EmpireQuery::create()->findPk('RED');
-$blue  = EmpireQuery::create()->findPk('BLU');
-$green = EmpireQuery::create()->findPk('GRN');
+$red   = EmpireQuery::create()->filterByGame($game)->filterByName('RED')->findOne();
+$blue  = EmpireQuery::create()->filterByGame($game)->filterByName('BLU')->findOne();
+$green = EmpireQuery::create()->filterByGame($game)->filterByName('GRN')->findOne();
 
-// Territories
-$t_a = TerritoryTemplateQuery::create()->findByName('A');
-$t_b = TerritoryTemplateQuery::create()->findByName('B');
-$t_c = TerritoryTemplateQuery::create()->findByName('C');
-$t_d = TerritoryTemplateQuery::create()->findByName('D');
-$t_e = TerritoryTemplateQuery::create()->findByName('E');
 
-$match = new Match("The Past", 1812);
-$match->start();
+$match = Match::create($game, "Matt Test");
 $turn = $match->getCurrentTurn();
 print "\n" . $match ."\n";
 
+// Territories
+// Crate the $t_<territory> magic variables.
+$t_names=array('A', 'B', 'C', 'D', 'E');
+//$config->system->db->useDebug(true);
+foreach ($t_names as $n) {
+	$c = new Criteria; $c->add(TerritoryTemplateTableMap::COL_NAME, $n);
+	$tt = $game->getGameTerritories($c);
+	$varname  = "t_".strtolower($n);
+	$$varname = StateQuery::create()->filterByTerritory($tt)->findOne();
+}
+
+exit;
 $case = 2;
 switch ($case) {
 	case 1;
 		// Test move conflict
-		$turn->addOrder(new Move(new Unit('Army'), $red, $t_a, $t_b));
-		$turn->addOrder(new Move(new Unit('Army'), $red, $t_a, $t_c));
-		$turn->addOrder(new Move(new Unit('Army'), $blue, $t_a, $t_b));
-		$turn->addOrder(new Move(new Unit('Army'), $green, $t_e, $t_d));
+		$turn->addOrder(Move::create(new Unit('Army'),  $red,    $t_a,  $t_b));
+		$turn->addOrder(Move::create(new Unit('Army'),  $red,    $t_a,  $t_c));
+		$turn->addOrder(Move::create(new Unit('Army'),  $blue,   $t_a,  $t_b));
+		$turn->addOrder(Move::create(new Unit('Army'),  $green,  $t_e,  $t_d));
 		break;
 	case 2;
 		// Test support
-		$turn->addOrder(new Move(new Unit('Army'), $red, $t_a, $t_b));
-		$turn->addOrder(new Move(new Unit('Army'), $blue, $t_a, $t_b));
-		$turn->addOrder(new Support(new Unit('Army'), $green, $red, $t_e, $t_b));
+		$turn->addOrder(Move::create(new Unit('Army'),  $red,    $t_a,  $t_b));
+		$turn->addOrder(Move::create(new Unit('Army'),  $blue,   $t_a,  $t_b));
+		$turn->addOrder(Move::create(new Unit('Army'),  $green,  $red,  $t_e, $t_b));
 		break;
 }
 
