@@ -20,8 +20,10 @@ class Unit {
 			$this->type = StateTableMap::COL_UNIT_FLEET;
 		elseif (is_null($type) || $type == StateTableMap::COL_UNIT_NONE)
 			$this->type = StateTableMap::COL_UNIT_NONE;
-		else
-			trigger_error('Must specify unit type, "'. $type .'" provided.');
+		else {
+			$this->type = StateTableMap::COL_UNIT_NONE;
+			throw new InvalidUnitException('Must specify unit type, "'. $type .'" provided.');
+		}
 	}
 	public function __toString() {
 		switch ($this->type) {
@@ -48,6 +50,9 @@ class Unit {
 		// 		return StateTableMap::COL_UNIT_NONE;
 		// }
 	}
+	public function isValid() {
+		return $this->type != StateTableMap::COL_UNIT_NONE;
+	}
 }
 
 interface iEmpire {
@@ -57,6 +62,9 @@ interface iEmpire {
 	/** Empire ID **/
 	public function getEmpireId();
 }
+
+class EmpireException extends \Exception { };
+class InvalidUnitException extends EmpireException { };
 
 // going to be replaced with a propel class
 // class Empire implements iEmpire {
