@@ -4,13 +4,12 @@ namespace DiplomacyEngine;
 use DiplomacyEngine\Unit;
 use DiplomacyEngine\iEmpire as Empire;
 
-interface iOrder  {
-	/** Returns the string representation of the order */
-	public function __toString();
-
-	/** Marks the order as failed */
-	public function fail($reason);
-}
+/**
+ * Easy way to see if this order has a
+ * destination or not.
+ */
+interface MultiTerritory  {}
+interface SingleTerritory  {}
 
 // abstract class Order implements iOrder {
 //

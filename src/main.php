@@ -18,6 +18,8 @@ use DiplomacyOrm\State;
 use DiplomacyOrm\StateQuery;
 use DiplomacyOrm\Game;
 use DiplomacyOrm\GameQuery;
+use DiplomacyOrm\Order;
+use DiplomacyOrm\OrderQuery;
 
 use DiplomacyOrm\Move;
 use DiplomacyOrm\Support;
@@ -26,6 +28,16 @@ use Propel\Runtime\ActiveQuery\Criteria;
 
 require_once( __DIR__ . '/../config/config.php');
 
+
+// Try retreiving an order..
+$config->system->db->useDebug(true);
+$order = OrderQuery::create()->find();
+if ($order instanceof Order) {
+	print "Order: $order\n";
+	exit;
+}
+$config->system->db->useDebug(false);
+
 // Clear the DB first
 use Propel\Runtime\Propel;
 $con = Propel::getWriteConnection(DiplomacyOrm\Map\GameTableMap::DATABASE_NAME);
@@ -33,6 +45,7 @@ $sql = "DELETE FROM game";
 $stmt = $con->prepare($sql);
 $stmt->execute();
 
+//$config->system->db->useDebug(true);
 
 // Create or use
 $game = null;
@@ -64,7 +77,6 @@ if (count($games) == 1) {
 // print "Texas-Ohio? "    . ($texas->isNeighbour($ohio) ? 'FAIL':'PASS') . "\n";
 
 // Empires
-//$config->system->db->useDebug(true);
 $red   = EmpireQuery::create()->filterByGame($game)->filterByAbbr('RED')->findOne();
 $blue  = EmpireQuery::create()->filterByGame($game)->filterByAbbr('BLU')->findOne();
 $green = EmpireQuery::create()->filterByGame($game)->filterByAbbr('GRN')->findOne();
@@ -84,6 +96,7 @@ foreach ($t_names as $n) {
 	$$varname = StateQuery::create()->filterByTerritory($tt)->findOne();
 }
 
+
 $case = 2;
 switch ($case) {
 	case 1;
@@ -95,9 +108,14 @@ switch ($case) {
 		break;
 	case 2;
 		// Test support
-		$turn->addOrder(Move::createNS($red,       new Unit('Army'),  $t_a,              $t_b));
-		$turn->addOrder(Move::createNS($blue,      new Unit('Army'),  $t_a,              $t_b));
-		$turn->addOrder(Support::createNS($green,  $red,              new Unit('Army'),  $t_e,    $t_b));
+		$turn->addOrder(Move::createNS($red,       new Unit('Army'),  $t_a,  $t_b));
+		$turn->addOrder(Move::createNS($blue,      new Unit('Army'),  $t_a,  $t_b));
+		$turn->addOrder(Support::createNS($green,  $red,              $t_e,  $t_b));
+		break;
+	case 3:
+$config->system->db->useDebug(true);
+		$turn->addOrder(Order::interpretText("MOVE army A-B", $match, $red));
+		$turn->addOrder(Order::interpretText("SUPPORT RED E-B", $match, $green));
 		break;
 }
 $turn->save();
