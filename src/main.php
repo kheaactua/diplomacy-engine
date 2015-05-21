@@ -20,9 +20,11 @@ use DiplomacyOrm\Game;
 use DiplomacyOrm\GameQuery;
 use DiplomacyOrm\Order;
 use DiplomacyOrm\OrderQuery;
+use DiplomacyOrm\ResolutionResult;
 
 use DiplomacyOrm\Move;
 use DiplomacyOrm\Support;
+use DiplomacyOrm\Retreat;
 
 use Propel\Runtime\ActiveQuery\Criteria;
 
@@ -30,13 +32,13 @@ require_once( __DIR__ . '/../config/config.php');
 
 
 // Try retreiving an order..
-$config->system->db->useDebug(true);
+//$config->system->db->useDebug(true);
 $order = OrderQuery::create()->find();
 if ($order instanceof Order) {
 	print "Order: $order\n";
 	exit;
 }
-$config->system->db->useDebug(false);
+//$config->system->db->useDebug(false);
 
 // Clear the DB first
 use Propel\Runtime\Propel;
@@ -97,7 +99,7 @@ foreach ($t_names as $n) {
 }
 
 
-$case = 2;
+$case = 3;
 switch ($case) {
 	case 1;
 		// Test move conflict
@@ -113,17 +115,33 @@ switch ($case) {
 		$turn->addOrder(Support::createNS($green,  $red,              $t_e,  $t_b));
 		break;
 	case 3:
-$config->system->db->useDebug(true);
+//$config->system->db->useDebug(true);
 		$turn->addOrder(Order::interpretText("MOVE army A-B", $match, $red));
 		$turn->addOrder(Order::interpretText("SUPPORT RED E-B", $match, $green));
 		break;
 }
 $turn->save();
 
-$turn->resolveAttacks();
+$result = $turn->processOrders();
+$turn->printOrders();
+if ($result->getStatus() == ResolutionResult::RETREATS_REQUIRED) {
+	print $result;
+
+	$retreat = Retreat::createNS($blue, $t_b, $t_c);
+	print "Adding retreat order: $retreat\n";
+	$turn->addOrder($retreat);
+
+	print "----------------------------------------\n";
+	print "After adding retreat order..\n";
+	$turn->printOrders();
+	$result = $turn->processOrders();
+	print $result;
+}
+
+
+$match->next();
 
 // Show which orders have failed, etc
-$turn->printOrders();
 
 print "\n" . $match ."\n";
 
