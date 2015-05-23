@@ -63,11 +63,12 @@ $str[] = "Raw input: " . print_r($rawinput , true);
 $MLOG->addDebug(join("\n", $str));
 
 ////////////////////////////////////////////////////////////////////////
-//   DEBUG STUFF
+//  /DEBUG STUFF
 ////////////////////////////////////////////////////////////////////////
 
 try {
-	$RestMatchRoutes = Server::create('/rest/games/', new \DiplomacyEngineRestApi\v1\Game)
+
+	$RestGameRoutes = Server::create('/rest/games', new \DiplomacyEngineRestApi\v1\Game)
 		->addGetRoute('', 'doGetGames')
 		;
 
@@ -93,19 +94,22 @@ try {
 		;
 
 
-	// // Not 100% sure I need this..
-	// $miscRoutes = Server::create('/', new \DiplomacyEngineRestApi\v15\RouteHandler)
-	// 	//->addOptionsRoute('ping', function () { return; })
-	// 	//->addOptionsRoute('(.*)', function ($p1=null) { return; })
-	// 	;
+	// Not 100% sure I need this..
+	$miscRoutes = Server::create('/', new \DiplomacyEngineRestApi\v1\RouteHandler)
+		->addOptionsRoute('ping', function () { return; })
+		->addOptionsRoute('(.*)', function ($p1=null) { return; })
+		;
 
-	$routes = array($RestMatchRoutes, $RestMatchRoutes, $RestOrderRoutes, $RpcMatchRoutes, $RpcOrderRoutes, $RpcOrderRoutes);
-	//$routes = array($RpcUserRoutes);
+	$routes = array($RestGameRoutes, $RestMatchRoutes, $RestOrderRoutes, $RpcMatchRoutes, $RpcOrderRoutes, $RpcOrderRoutes, $miscRoutes);
+	// $routes = array($RestGameRoutes);
 	foreach ($routes as $r) {
 		$r->setExceptionHandler($exHandlerFactory($config, $r));
 		$r->setDebugMode($config->host->mode==='dev');
 		$r->setFallbackMethod('defaultRoute');
-		if ($config->host->INTERFACE_TYPE === 'web') $r->run(); // If it's CLI, we're simulating and don't want this
+		if ($config->host->INTERFACE_TYPE === 'web') {
+			//$MLOG->debug("Running ". get_class($r) ."");
+			$r->run(); // If it's CLI, we're simulating and don't want this
+		}
 	}
 
 //} catch (\Propel\Runtime\Exception\PropelException $e) {
