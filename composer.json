@@ -4,6 +4,7 @@
 	"require": {
 		"php": ">=5.3.0",
 		"monolog/monolog": ">=1.0",
+		"marcj/php-rest-service": "*",
 		"kheaactua/configurator": ">=0.2.0"
 	},
 	"minimum-stability": "dev",
@@ -11,7 +12,7 @@
 		"propel/propel-bundle": "~2.0@dev"
 	},
 	"autoload": {
-		"classmap": ["src/", "lib/", "orm/classes/DiplomacyOrm"]
+		"classmap": ["src/", "orm/classes/DiplomacyOrm", "lib/"]
 	},
 	"license": "MIT",
 	"authors": [

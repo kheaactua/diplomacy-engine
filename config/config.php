@@ -40,4 +40,14 @@ $config->system->db = $con; // It's been annoying to retrive this everywhere..
 // The host log was never set, so set it now
 $config->host->setLog($MLOG);
 
-// vim: ts=3 sw=3 noet :
+// Some ansi colours.. always useful..
+$s="\033[1;";
+$config->ansi = new Configurator\Constants($MLOG);
+$config->ansi->red="{$s}31m";
+$config->ansi->blue="{$s}34m";
+$config->ansi->green="{$s}32m";
+$config->ansi->cyan="{$s}36m";
+$config->ansi->yellow="{$s}33m";
+$config->ansi->clear="{$s}0m";
+
+// vim: ts=3 sw=3 sts=3 noet :
