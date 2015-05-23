@@ -1,9 +1,7 @@
 <?php
-
 require_once(dirname(__FILE__) . '/../config/config.php');
 
 global $MLOG;
-$MLOG->debug("here");
 
 include_once('error_handler.php');
 
@@ -25,7 +23,10 @@ if (!count($_REQUEST) && strlen($rawinput)) {
 	parse_str($rawinput, $arr);
 	$_REQUEST['putData'] = $arr;
 	$_POST['putData'] = $arr;
+} else {
+	$_REQUEST['putData'] = '';
 }
+
 
 ////////////////////////////////////////////////////////////////////////
 //   DEBUG STUFF
@@ -121,8 +122,10 @@ try {
 }
 
 
-//print_r($RpcUserRoutes->describe());
-//$RpcUserRoutes->simulateCall('/rpc/user/login?network=mayofest&token=whateva', 'OPTIONS');
+//print_r($RestGameRoutes->describe());
+//print $RestGameRoutes->simulateCall('/rest/games', 'GET');
+//print $RestMatchRoutes->simulateCall('/rest/matches', 'GET');
+//$RestGameRoutes->simulateCall(' /rest/games/', 'OPTIONS');
 //$uRoutes->simulateCall('/user/1/order/createNewMembershipOrder?memtype=attendant', 'get');
 //$uRoutes->simulateCall('/user/lookUp', 'get');
 //$rpcRoutes->simulateCall('/rpc/user/addCredentials', 'post');
