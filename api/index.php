@@ -77,8 +77,8 @@ try {
 		->addGetRoute( '', 'doGetMatches')
 		->addGetRoute( '([0-9]+)', 'doGetEmpires')
 		->addPostRoute('([0-9]+)/empires/([0-9]+)/orders', 'doAddOrder')
-		->addPostRoute( '([0-9]+)/empires/([0-9]+)/orders/validate', 'doValidate')
 		->addGetRoute( '([0-9]+)/empires/([0-9]+)/territories', 'doGetEmpireTerritoryMap')
+		->addPostRoute('([0-9]+)/empires/([0-9]+)/orders/validate', 'doValidate')
 		;
 
 	$RestTerritoryRoutes = Server::create('/rest/territories', new \DiplomacyEngineRestApi\v1\Territory)
