@@ -99,7 +99,7 @@ foreach ($t_names as $n) {
 }
 
 
-$case = 3;
+$case = 4;
 switch ($case) {
 	case 1;
 		// Test move conflict
@@ -121,9 +121,21 @@ switch ($case) {
 		} catch (\DiplomacyOrm\InvalidOrderException $e) {
 			print "[{$config->ansi->red}Error{$config->ansi->clear}]: Red cannot MOVE A-B: ". $e->getMessage() . "\n";
 			exit;
+		} catch (DiplomacyOrm\TurnClosedToOrdersException $e) {
+			print "[{$config->ansi->red}Error{$config->ansi->clear}]: Some how the turn state is empty again: ". $e->getMessage() . "\n";
+			exit;
 		}
 		$turn->addOrder(Order::interpretText("SUPPORT RED E-B", $match, $green));
 		break;
+	case 4:
+		// Test the case with multiple contendors stalemat. standoff.svg
+		$turn->addOrder(Order::interpretText("MOVE army A-B", $match, $red));
+		$turn->addOrder(Order::interpretText("SUPPORT RED F-B", $match, $red));
+		$turn->addOrder(Order::interpretText("MOVE army I-B", $match, $green));
+		$turn->addOrder(Order::interpretText("SUPPORT GREEN H-B", $match, $green));
+
+		// RED and GREEN should loose in statemates, B should belong to BLUE
+
 }
 $turn->save();
 
