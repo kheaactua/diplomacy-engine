@@ -10,27 +10,29 @@
 		  gamesCtrl.games = response.data.data;
 		});
 	}]);
-	
-	app.controller('EmpiresController', ['$http', function($http){
-   
-		this.empires = "Hello, these are the empires";
-		var empiresCtrl = this;
-		this.match = {};
+ 
+	app.controller('MatchesController', ['$http', function($http){
+  
+		this.matches = "Hello, these are the matches";
+		var matchesCtrl = this;
 		
-		$http.get('http://diplomacy.asilika.com:9494/api/rest/matches/108').success(function(data){
-		  empiresCtrl.empires = data;
+		$http.get('http://diplomacy.asilika.com:9494/api/rest/matches').success(function(response){
+		  matchesCtrl.matches = response.data.data;
 		});
 	}]);
- 
-//	app.controller('MatchesController', ['$http', function($http){
-//  
-//		this.matches = "Hello, these are the matches";
-//		var matchesCtrl = this;
-//		
-//		$http.get('http://diplomacy.asilika.com:9494/api/rest/matches').success(function(data){
-//		  matchesCtrl.matches = data;
-//		});
-//	}]);
+	
+
+	app.controller('EmpiresController', ['$http', function($http){
+		this.getMatch = function getMatch(id){
+			this.empires="Hello, these are the empires for match " + id;
+			var matchCtrl = this;
+			$http.get('http://diplomacy.asilika.com:9494/api/rest/matches/'+id).success(function(response){
+				matchCtrl.empires = response.data.data;
+			});
+			
+		}
+		this.getMatch(49);
+	}]);
 	
 	app.controller('UnitController', ['$http', function($http){
    
