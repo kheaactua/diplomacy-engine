@@ -78,6 +78,7 @@ try {
 		->addGetRoute( '([0-9]+)', 'doGetEmpires')
 		->addPostRoute('([0-9]+)/empires/([0-9]+)/orders', 'doAddOrder')
 		->addGetRoute( '([0-9]+)/empires/([0-9]+)/territories', 'doGetEmpireTerritoryMap')
+		->addGetRoute( '([0-9]+)/territories', 'doGetTerritories')
 		->addPostRoute('([0-9]+)/empires/([0-9]+)/orders/validate', 'doValidate')
 		;
 
