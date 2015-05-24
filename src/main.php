@@ -99,7 +99,7 @@ foreach ($t_names as $n) {
 }
 
 
-$case = 4;
+$case = 5;
 switch ($case) {
 	case 1;
 		// Test move conflict
@@ -135,6 +135,9 @@ switch ($case) {
 		$turn->addOrder(Order::interpretText("SUPPORT GREEN H-B", $match, $green));
 
 		// RED and GREEN should loose in statemates, B should belong to BLUE
+		break;
+	case 5:
+		$turn->addOrder(Order::interpretText("MOVE army E-C", $match, $green));
 
 }
 $turn->save();
