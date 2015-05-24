@@ -9,23 +9,28 @@
     <div ng-controller="GamesController as gamesCtrl">
       <h2>Available games</h2> {{gamesCtrl.games}}
     </div>
-	<div ng-controller="MatchesController as matchesCtrl">
-        <label for='match'>All Matches</label>
-		<select ng-model='match' name='match' id='match'>
-			<option ng-repeat='match in matchesCtrl.matches' value='{{match.id}}'>
-				{{match.name}}
-			</option>
-		</select>
-    </div>
-	<div ng-controller="EmpiresController as empiresCtrl">
-		<label for='empire'>Empires in current match</label>
-		<select ng-model='empire' name='empire' id='empire'>
-			<option ng-repeat='empire in empiresCtrl.empires' value='{{empire.id}}'>
-				{{empire.name}}
-			</option>
-		</select>
-    </div>
 	
+	<div ng-controller="MatchesController as matchesCtrl">
+		<div ng-controller="EmpiresController as empiresCtrl">
+			<div>
+				<label for='match'>All Matches</label>
+				<select ng-model='matchId' name='match' id='match' ng-change='empiresCtrl.loadEmpires(matchId)'>
+					<option ng-repeat='match in matchesCtrl.matches' value={{match.match_id}}>
+						{{match.name}}
+					</option>
+				</select>
+			</div>
+			
+			<div >
+				<label for='empire'>Empires in current match</label>
+				<select ng-model='empire' name='empire' id='empire'>
+					<option ng-repeat='empire in empiresCtrl.empires' value='{{empire.id}}'>
+						{{empire.name}}
+					</option>
+				</select>
+			</div>
+		</div>
+	</div>
 	
 	<br><br><br>
 	<div ng-controller="UnitController as unitCtrl">

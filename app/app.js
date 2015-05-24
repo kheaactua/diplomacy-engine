@@ -23,15 +23,14 @@
 	
 
 	app.controller('EmpiresController', ['$http', function($http){
-		this.getMatch = function getMatch(id){
-			this.empires="Hello, these are the empires for match " + id;
-			var matchCtrl = this;
-			$http.get('http://diplomacy.asilika.com:9494/api/rest/matches/'+id).success(function(response){
-				matchCtrl.empires = response.data.data;
-			});
+		var empiresCtrl = this;
+		this.loadEmpires = function(id){
 			
+			$http.get('http://diplomacy.asilika.com:9494/api/rest/matches/'+id).success(function(response){
+				empiresCtrl.empires = response.data.data;
+				alert(response.data.data);
+			});
 		}
-		this.getMatch(49);
 	}]);
 	
 	app.controller('UnitController', ['$http', function($http){
