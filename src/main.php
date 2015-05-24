@@ -116,7 +116,12 @@ switch ($case) {
 		break;
 	case 3:
 //$config->system->db->useDebug(true);
-		$turn->addOrder(Order::interpretText("MOVE army A-B", $match, $red));
+		try {
+			$turn->addOrder(Order::interpretText("MOVE army A-B", $match, $red));
+		} catch (\DiplomacyOrm\InvalidOrderException $e) {
+			print "[{$config->ansi->red}Error{$config->ansi->clear}]: Red cannot MOVE A-B: ". $e->getMessage() . "\n";
+			exit;
+		}
 		$turn->addOrder(Order::interpretText("SUPPORT RED E-B", $match, $green));
 		break;
 }
