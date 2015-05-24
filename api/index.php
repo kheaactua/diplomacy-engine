@@ -81,6 +81,8 @@ try {
 		->addGetRoute( '([0-9]+)/empires/([0-9]+)/territories', 'doGetEmpireTerritoryMap')
 		;
 
+	$RestTerritoryRoutes = Server::create('/rest/territories', new \DiplomacyEngineRestApi\v1\Territory)
+		->addGetRoute( '([0-9]+)', 'doGetTerritory')
 		;
 
 	// RPC routes
@@ -91,13 +93,13 @@ try {
 
 
 
-	// Not 100% sure I need this..
+	// Just for testing
 	$miscRoutes = Server::create('/', new \DiplomacyEngineRestApi\v1\RouteHandler)
 		->addOptionsRoute('ping', function () { return; })
 		->addOptionsRoute('(.*)', function ($p1=null) { return; })
 		;
 
-	$routes = array($RestGameRoutes, $RestMatchRoutes, $RpcMatchRoutes, $miscRoutes);
+	$routes = array($RestGameRoutes, $RestMatchRoutes, $RestTerritoryRoutes, $RpcMatchRoutes, $miscRoutes);
 	// $routes = array($RestGameRoutes);
 	foreach ($routes as $r) {
 		$r->setExceptionHandler($exHandlerFactory($config, $r));
