@@ -139,7 +139,11 @@ if ($result->getStatus() == ResolutionResult::RETREATS_REQUIRED) {
 }
 
 
-$match->next();
+try {
+	$match->next();
+} catch (\DiplomacyOrm\TurnNotCompleteException $ex) {
+	print "Called next, received: '". $ex->getMessage() . "'\n";
+}
 
 // Show which orders have failed, etc
 
