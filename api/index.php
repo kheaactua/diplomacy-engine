@@ -74,7 +74,7 @@ try {
 
 	$RestMatchRoutes = Server::create('/rest/matches/', new \DiplomacyEngineRestApi\v1\Match)
 		->addPostRoute('', 'doCreateMatch')
-		->addGetRoute('', 'doGetEmpires')
+		->addGetRoute('([0-9]+)', 'doGetEmpires')
 		;
 
 	$RestOrderRoutes = Server::create('/rest/matches/', new \DiplomacyEngineRestApi\v1\Order)
