@@ -75,13 +75,15 @@ try {
 	$RestMatchRoutes = Server::create('/rest/matches/', new \DiplomacyEngineRestApi\v1\Match)
 		->addPostRoute('', 'doCreateMatch')
 		->addGetRoute('([0-9]+)', 'doGetEmpires')
+		->addPostRoute('([0-9]+)/empires/([0-9]+)/orders', 'doAddOrder')
+		->addGetRoute('([0-9]+)/empires/([0-9]+)/orders/validate', 'doValidate')
+
 		;
 
-	$RestOrderRoutes = Server::create('/rest/matches/', new \DiplomacyEngineRestApi\v1\Order)
-		//->addGetRoute('([0-9]+)', 'doGetOrder')
-		->addPostRoute('([0-9]+)/orders', 'doAddOrder')
-		//->addDeleteRoute('([0-9]+)/orders/([0-9]+)', 'doDeleteOrder')
-		;
+	// $RestOrderRoutes = Server::create('/rest/matches/', new \DiplomacyEngineRestApi\v1\Order)
+	// 	//->addGetRoute('([0-9]+)', 'doGetOrder')
+	// 	//->addDeleteRoute('([0-9]+)/orders/([0-9]+)', 'doDeleteOrder')
+	// 	;
 
 	// RPC routes
 
@@ -100,7 +102,7 @@ try {
 		->addOptionsRoute('(.*)', function ($p1=null) { return; })
 		;
 
-	$routes = array($RestGameRoutes, $RestMatchRoutes, $RestOrderRoutes, $RpcMatchRoutes, $RpcOrderRoutes, $RpcOrderRoutes, $miscRoutes);
+	$routes = array($RestGameRoutes, $RestMatchRoutes, $RpcMatchRoutes, $RpcOrderRoutes, $RpcOrderRoutes, $miscRoutes);
 	// $routes = array($RestGameRoutes);
 	foreach ($routes as $r) {
 		$r->setExceptionHandler($exHandlerFactory($config, $r));
