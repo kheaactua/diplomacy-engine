@@ -28,15 +28,18 @@
 			
 			$http.get('http://diplomacy.asilika.com:9494/api/rest/matches/'+id).success(function(response){
 				empiresCtrl.empires = response.data.data;
-				alert(response.data.data);
 			});
 		}
 	}]);
 	
 	app.controller('UnitController', ['$http', function($http){
-   
-		this.territories = [{unitType:'army', territory: 'canada'},{unitType:'fleet', territory: 'greenland'},{unitType:'none', territory: 'cuba'}];
-		
+		var territoriesCtrl = this;
+		this.loadTerritories = function(id){
+			
+			$http.get('http://diplomacy.asilika.com:9494/api/rest/matches/'+id+'/territories').success(function(response){
+				territoriesCtrl.territories = response.data.data;
+			});
+		}
 		//$http.get('http://diplomacy.asilika.com:9494/api/rest/matches').success(function(data){
 		 // 
 		//});

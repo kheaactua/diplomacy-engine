@@ -6,86 +6,82 @@
 	<script type="text/javascript" src="app.js"></script>
   </head>
   <body>
-    <div ng-controller="GamesController as gamesCtrl">
-      <h2>Available games</h2> {{gamesCtrl.games}}
-    </div>
-	
 	<div ng-controller="MatchesController as matchesCtrl">
 		<div ng-controller="EmpiresController as empiresCtrl">
-			<div>
-				<label for='match'>All Matches</label>
-				<select ng-model='matchId' name='match' id='match' ng-change='empiresCtrl.loadEmpires(matchId)'>
-					<option ng-repeat='match in matchesCtrl.matches' value={{match.match_id}}>
-						{{match.name}}
-					</option>
-				</select>
-			</div>
-			
-			<div >
-				<label for='empire'>Empires in current match</label>
-				<select ng-model='empire' name='empire' id='empire'>
-					<option ng-repeat='empire in empiresCtrl.empires' value='{{empire.id}}'>
-						{{empire.name}}
-					</option>
-				</select>
+			<div ng-controller="UnitController as unitCtrl">
+				<div>
+					<label for='match'>All Matches</label>
+					<select ng-model='matchId' name='match' id='match' ng-change='empiresCtrl.loadEmpires(matchId)'>
+						<option ng-repeat='match in matchesCtrl.matches' value={{match.match_id}}>
+							{{match.name}}
+						</option>
+					</select>
+				</div>
+				
+				<div >
+					<label for='empire'>Empires in current match</label>
+					<select ng-model='empireId' name='empire' id='empire' ng-change='unitCtrl.loadTerritories(matchId);'>
+						<option ng-repeat='empire in empiresCtrl.empires' value='{{empire.empire_id}}'>
+							{{empire.name}}
+						</option>
+					</select>
+				</div>
+				<ul>
+					<!-- I couldn't get this show statement to work as a filter -->
+					<li ng-repeat='territory in unitCtrl.territories | filter : {unit: "!none"}' ng-show='empireId == territory.occupier.empire_id'>
+					
+						<form>
+						<h3>{{territory.name}} | {{territory.unit}}</h3>
+							<label for='action'>Action:</label>
+							<select ng-model='action' name='action' id='action'>
+								<option value='hold' ng-selected='true'>Hold</option>
+								<option value='move'>Move or Attack</option>
+								<option value='support'>Support</option>
+								<option ng-show='territory.unit === "fleet"' value='convoy'>Convoy</option>
+							</select>
+							
+							<div ng-show='action=="move"'>
+								<label for='move-destination'>Move to:</label>
+								<select name='destination' id='move-destination'>
+									<option value='test'>Test</option>
+								</select>
+							</div>
+							
+							<div ng-show='action=="support"'>
+								<div>
+									<label for='support-territory'>Support troops in:</label>
+									<select name='territory' id='support-territory'>
+										<option value='test'>Test</option>
+									</select>
+								</div>
+								<div>
+									<label for='support-destination'>Support them to:</label>
+									<select name='destination' id='support-destination'>
+										<option value='test'>Hold</option>
+										<option value='test'>Other</option>
+									</select>
+								</div>
+							</div>
+							
+							<div ng-show='action=="convoy"'>
+								<div>
+									<label for='convoy-source'>Convoy from</label>
+									<select name='source' id='convoy-source'>
+										<option value='test'>Test</option>
+									</select>
+								</div>
+								<div>
+									<label for='support-destination'>Convoy to</label>
+									<select name='destination' id='support-destination'>
+										<option value='test'>Other</option>
+									</select>
+								</div>
+							</div>
+						</form>
+					</li>
+				</ul>
 			</div>
 		</div>
-	</div>
-	
-	<br><br><br>
-	<div ng-controller="UnitController as unitCtrl">
-		<ul>
-			<li ng-repeat='unit in unitCtrl.territories | filter : {unitType: "!none"}'>
-				<h3>{{unit.territory}} | {{unit.unitType}}</h3>
-				<form>
-					<label for='action'>Action:</label>
-					<select ng-model='action' name='action' id='action'>
-						<option value='hold' ng-selected='true'>Hold</option>
-						<option value='move'>Move or Attack</option>
-						<option value='support'>Support</option>
-						<option ng-show='unit.unitType === "fleet"' value='convoy'>Convoy</option>
-					</select>
-					
-					<div ng-show='action=="move"'>
-						<label for='move-destination'>Move to:</label>
-						<select name='destination' id='move-destination'>
-							<option value='test'>Test</option>
-						</select>
-					</div>
-					
-					<div ng-show='action=="support"'>
-						<div>
-							<label for='support-territory'>Support troops in:</label>
-							<select name='territory' id='support-territory'>
-								<option value='test'>Test</option>
-							</select>
-						</div>
-						<div>
-							<label for='support-destination'>Support them to:</label>
-							<select name='destination' id='support-destination'>
-								<option value='test'>Hold</option>
-								<option value='test'>Other</option>
-							</select>
-						</div>
-					</div>
-					
-					<div ng-show='action=="convoy"'>
-						<div>
-							<label for='convoy-source'>Convoy from</label>
-							<select name='source' id='convoy-source'>
-								<option value='test'>Test</option>
-							</select>
-						</div>
-						<div>
-							<label for='support-destination'>Convoy to</label>
-							<select name='destination' id='support-destination'>
-								<option value='test'>Other</option>
-							</select>
-						</div>
-					</div>
-				</form>
-			</li>
-		</ul>
 	</div>
   </body>
 </html>
