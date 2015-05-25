@@ -38,6 +38,15 @@
 			});
 		}
 	}]);
-  });
 	
+	
+	app.directive("neighbourTerritories", function(){
+		return {
+		  restrict: 'E',
+		  templateUrl: 'neighbour-territories.html'
+		};
+	
+	});
+	
+
 })();

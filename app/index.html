@@ -42,9 +42,7 @@
 					<div ng-show='action=="move"'>
 						<label for='move-destination'>Move to:</label>
 						<select name='destination' id='move-destination'>
-							<option ng-repeat='territory in boardSquare.neighbours' value='territory.territory_id'>
-								{{territory.name}}
-							</option>
+							<neighbour-territories></neighbour-territories>
 						</select>
 					</div>
 					
@@ -52,14 +50,16 @@
 						<div>
 							<label for='support-territory'>Support troops in:</label>
 							<select name='territory' id='support-territory'>
-								<option value='test'>Test</option>
+								<option ng-repeat='territory in boardSquare.neighbours' value='territory.territory_id'>
+									{{territory.name}}
+								</option>
 							</select>
 						</div>
 						<div>
 							<label for='support-destination'>Support them to:</label>
 							<select name='destination' id='support-destination'>
 								<option value='test'>Hold</option>
-								<option value='test'>Other</option>
+								<neighbour-territories></neighbour-territories>
 							</select>
 						</div>
 					</div>
@@ -68,13 +68,13 @@
 						<div>
 							<label for='convoy-source'>Convoy from</label>
 							<select name='source' id='convoy-source'>
-								<option value='test'>Test</option>
+								<neighbour-territories></neighbour-territories>
 							</select>
 						</div>
 						<div>
 							<label for='support-destination'>Convoy to</label>
 							<select name='destination' id='support-destination'>
-								<option value='test'>Other</option>
+								<neighbour-territories></neighbour-territories>
 							</select>
 						</div>
 					</div>
