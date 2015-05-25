@@ -1,0 +1,27 @@
+{
+  "name": "diplomacy-engine",
+  "version": "0.1.0",
+  "homepage": "https://github.com/kheaactua/diplomacy-engine",
+  "authors": [
+    "Matthew Russell <matthew.g.russell@gmail.com>",
+    "Grab O'Byrne <obyrne.gray@gmail.com>"
+  ],
+  "description": "Variation of the classic Diplomacy Game",
+  "keywords": [
+    "game",
+    "diplomacy",
+    "php"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "app/bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "~2.1.4"
+  }
+}
