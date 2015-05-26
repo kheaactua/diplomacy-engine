@@ -24,7 +24,7 @@
 				</option>
 			</select>
 		</div>
-		{{matchesCtrl.territories}}
+		<!--{{matchesCtrl.territories}}-->
 		<ul>
 			<!-- I couldn't get this show statement to work as a filter -->
 			<li ng-repeat='boardSquare in matchesCtrl.territories | filter : {unit: "!none"}'>
@@ -42,7 +42,9 @@
 					<div ng-show='action=="move"'>
 						<label for='move-destination'>Move to:</label>
 						<select name='destination' id='move-destination'>
-							<neighbour-territories></neighbour-territories>
+							<option ng-repeat='territory in boardSquare.neighbours' value='territory.territory_id'>
+								{{territory.name}}
+							</option>
 						</select>
 					</div>
 					
@@ -58,8 +60,9 @@
 						<div>
 							<label for='support-destination'>Support them to:</label>
 							<select name='destination' id='support-destination'>
-								<option value='test'>Hold</option>
-								<neighbour-territories></neighbour-territories>
+								<option ng-repeat='territory in boardSquare.neighbours' value='territory.territory_id'>
+									{{territory.name}}
+								</option>
 							</select>
 						</div>
 					</div>
@@ -68,13 +71,17 @@
 						<div>
 							<label for='convoy-source'>Convoy from</label>
 							<select name='source' id='convoy-source'>
-								<neighbour-territories></neighbour-territories>
+								<option ng-repeat='territory in boardSquare.neighbours' value='territory.territory_id'>
+									{{territory.name}}
+								</option>
 							</select>
 						</div>
 						<div>
 							<label for='support-destination'>Convoy to</label>
 							<select name='destination' id='support-destination'>
-								<neighbour-territories></neighbour-territories>
+								<option ng-repeat='territory in boardSquare.neighbours' value='territory.territory_id'>
+									{{territory.name}}
+								</option>
 							</select>
 						</div>
 					</div>
