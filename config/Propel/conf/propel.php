@@ -1,6 +1,6 @@
 <?php
 
-$base = '/home/matt/diplomacy-engine';
+$base = '/home/matt/diplomacy-engine2';
 $orm = $base.'/orm';
 
 return [
@@ -10,7 +10,7 @@ return [
 				'diplomacy' => [
 					'adapter'    => 'mysql',
 					'classname'  => 'Propel\Runtime\Connection\ConnectionWrapper',
-					'dsn'        => 'mysql:host=localhost;dbname=diplomacy',
+					'dsn'        => 'mysql:host=localhost;dbname=diplomacy_gray',
 					'user'       => 'www',
 					'password'   => 'hyper',
 					'attributes' => []
