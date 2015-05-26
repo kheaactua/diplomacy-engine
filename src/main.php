@@ -51,24 +51,18 @@ $stmt->execute();
 
 // Create or use
 $game = null;
-$games = GameQuery::create()->findByName('test');
-if (count($games) == 1) {
-	$game = $games[0];
-} elseif (!count($games)) {
-	$game_name = 'test';
-	$p_objs = json_decode(file_get_contents($config->host->data . "/$game_name/empires.json"), false);
-	$t_objs = json_decode(file_get_contents($config->host->data . "/$game_name/territories.json"), false);
+$games = GameQuery::create()->filterByName('test%', Criteria::LIKE);
+$game_base_name = 'test';
+$game_name = $game_base_name . '_' . $games->count();
+$p_objs = json_decode(file_get_contents($config->host->data . "/$game_base_name/empires.json"), false);
+$t_objs = json_decode(file_get_contents($config->host->data . "/$game_base_name/territories.json"), false);
 
 
-	$game = Game::create($game_name, 1861, 'spring');
-	$game->loadEmpires($p_objs);
-	$game->loadTerritories($t_objs);
+$game = Game::create($game_name, 1861, 'spring');
+$game->loadEmpires($p_objs);
+$game->loadTerritories($t_objs);
 
-	$game->save();
-} else {
-	trigger_error("A duplicate got created!");
-}
-
+$game->save();
 
 // $texas   = Territory::findTerritoryByName($territories, 'Texas');
 // $sequoia = Territory::findTerritoryByName($territories, 'Sequoia');
@@ -99,7 +93,7 @@ foreach ($t_names as $n) {
 }
 
 
-$case = 5;
+$case = 4;
 switch ($case) {
 	case 1;
 		// Test move conflict
