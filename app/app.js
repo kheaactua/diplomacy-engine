@@ -1,12 +1,14 @@
 (function(){
 	var app = angular.module('diplomacy', []);
 	
+	var server = 'http://diplomacy2.asilika.com:9494';
+	
 	app.controller('GamesController', ['$http', function($http){
    
 		this.games = "Hello, these are the games";
 		var gamesCtrl = this;
 		
-		$http.get('http://diplomacy.asilika.com:9494/api/rest/games').success(function(response){
+		$http.get( server + '/api/rest/games').success(function(response){
 		  gamesCtrl.games = response.data.data;
 		});
 	}]);
@@ -16,7 +18,7 @@
 		this.matches = "Hello, these are the matches";
 		var matchesCtrl = this;
 		
-		$http.get('http://diplomacy.asilika.com:9494/api/rest/matches').success(function(response){
+		$http.get( server + '/api/rest/matches').success(function(response){
 		  matchesCtrl.matches = response.data.data;
 		});
 		
@@ -24,7 +26,7 @@
 			this.selectedMatch=this.matches[matchId];
 			
 			//Get empires for this match
-			$http.get('http://diplomacy.asilika.com:9494/api/rest/matches/'+matchId).success(function(response){
+			$http.get( server + '/api/rest/matches/'+matchId).success(function(response){
 				matchesCtrl.empires = response.data.data;
 			});
 		}
@@ -33,7 +35,7 @@
 			this.selectedEmpire=this.empires[empireId];
 			
 			//Get territories for this match
-			$http.get('http://diplomacy.asilika.com:9494/api/rest/matches/'+matchId+'/empires/'+empireId+'/territories?include_neighbours=1').success(function(response){
+			$http.get( server + '/api/rest/matches/'+matchId+'/empires/'+empireId+'/territories?include_neighbours=1').success(function(response){
 				matchesCtrl.territories = response.data.data;
 			});
 		}
