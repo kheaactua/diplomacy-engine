@@ -43,7 +43,7 @@ if ($order instanceof Order) {
 // Clear the DB first
 use Propel\Runtime\Propel;
 $con = Propel::getWriteConnection(DiplomacyOrm\Map\GameTableMap::DATABASE_NAME);
-$sql = "DELETE FROM game";
+$sql = "DELETE FROM game WHERE name<>'test'";
 $stmt = $con->prepare($sql);
 $stmt->execute();
 
@@ -117,7 +117,7 @@ switch ($case) {
 	case 3:
 //$config->system->db->useDebug(true);
 		try {
-			$turn->addOrder(Order::interpretText("MOVE army A-B", $match, $red));
+			$turn->addOrder(Order::interpretText("MOVE A-B", $match, $red));
 		} catch (\DiplomacyOrm\InvalidOrderException $e) {
 			print "[{$config->ansi->red}Error{$config->ansi->clear}]: Red cannot MOVE A-B: ". $e->getMessage() . "\n";
 			exit;
@@ -129,15 +129,15 @@ switch ($case) {
 		break;
 	case 4:
 		// Test the case with multiple contendors stalemat. standoff.svg
-		$turn->addOrder(Order::interpretText("MOVE army A-B", $match, $red));
+		$turn->addOrder(Order::interpretText("MOVE A-B", $match, $red));
 		$turn->addOrder(Order::interpretText("SUPPORT RED F-B", $match, $red));
-		$turn->addOrder(Order::interpretText("MOVE army I-B", $match, $green));
+		$turn->addOrder(Order::interpretText("MOVE I-B", $match, $green));
 		$turn->addOrder(Order::interpretText("SUPPORT GREEN H-B", $match, $green));
 
 		// RED and GREEN should loose in statemates, B should belong to BLUE
 		break;
 	case 5:
-		$turn->addOrder(Order::interpretText("MOVE army E-C", $match, $green));
+		$turn->addOrder(Order::interpretText("MOVE E-C", $match, $green));
 
 }
 $turn->save();
