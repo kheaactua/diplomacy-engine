@@ -25,20 +25,19 @@
 			</select>
 		</div>
 		<!--{{matchesCtrl.territories}}-->
-		<ul>
+		<ul class="list-unstyled">
 			<li ng-repeat='boardSquare in matchesCtrl.territories | filter : {unit: "!none"}'>
 				<form>
 					<h3>{{boardSquare.territory.name}} | {{boardSquare.unit}}</h3>
 					<div class='form-group'>
 						<label for='action'>Action:</label>
 						<select class='form-control' ng-model='action' name='action' id='action'>
-							<option value='hold' ng-selected='true'>Hold</option>
+							<option value='hold'>Hold</option>
 							<option value='move'>Move or Attack</option>
 							<option value='support'>Support</option>
 							<option ng-show='boardSquare.unit === "fleet"' value='convoy'>Convoy</option>
 						</select>
 					</div>
-					
 					<div ng-show='action=="move"'>
 						<div class='form-group'>
 							<label for='move-destination'>Move to:</label>
@@ -49,7 +48,6 @@
 							</select>
 						</div>
 					</div>
-					
 					<div ng-show='action=="support"'>
 						<div class='form-group'>
 							<label for='support-territory'>Support troops in:</label>
@@ -68,7 +66,6 @@
 							</select>
 						</div>
 					</div>
-					
 					<div ng-show='action=="convoy"'>
 						<div class='form-group'>
 							<label for='convoy-source'>Convoy from</label>

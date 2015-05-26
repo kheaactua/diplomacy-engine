@@ -13,7 +13,9 @@
 		});
 	}]);
  
-	app.controller('MatchesController', ['$http', function($http){
+	app.controller('MatchesController', ['$http', '$scope', function($http, $scope){
+  
+		$scope.action = 'hold';
   
 		this.matches = "Hello, these are the matches";
 		var matchesCtrl = this;
