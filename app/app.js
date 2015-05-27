@@ -13,7 +13,9 @@
 		});
 	}]);
  
-	app.controller('MatchesController', ['$http', function($http){
+	app.controller('MatchesController', ['$http', '$scope', '$window', function($http, $scope, $window){
+  
+		$scope.action = 'hold';
   
 		this.matches = "Hello, these are the matches";
 		var matchesCtrl = this;
@@ -39,8 +41,15 @@
 				matchesCtrl.territories = response.data.data;
 			});
 		}
+		
+		this.sendOrders = function(matchId, empireId, ordersText){
+			$window.alert(server + '/api/rest/matches/'+matchId+'/empires/'+empireId+'/orders?order_str='+escape(ordersText));
+			
+			$http.get( server + '/api/rest/matches/'+matchId+'/empires/'+empireId+'/orders?order_str='+escape(ordersText)).success(function(response){
+				alert(response.data);
+			});
+		}
 	}]);
-	
 	
 	app.directive("neighbourTerritories", function(){
 		return {
