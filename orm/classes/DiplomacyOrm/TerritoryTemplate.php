@@ -37,36 +37,50 @@ class TerritoryTemplate extends BaseTerritoryTemplate {
 		return $t;
 	}
 
+	public function shortType() {
+		if ($this->isLand()) return 'L';
+		if ($this->isWater()) return 'W';
+		if ($this->isCoast()) return 'C';
+		return $this->getType();
+	}
+
 	public function __toString() {
-		return sprintf('(%1s)%s', $this->isLand()?'L':'W', $this->getName());
+		return sprintf('(%1s)%s', $this->shortType(), $this->getName());
 	}
 
 	/** @return bool Check if $this is land */
-	public function isLand() { return $this->type == TerritoryTemplateTableMap::COL_TYPE_LAND; }
+	public function isLand() { return $this->getType() == TerritoryTemplateTableMap::COL_TYPE_LAND; }
+
+	/** @return bool Check if $this is a coast */
+	public function isCoast() { return $this->getType() == TerritoryTemplateTableMap::COL_TYPE_COAST; }
 
 	/** @return bool Check if $this is water */
-	public function isWater() { return $this->type == TerritoryTemplateTableMap::COL_TYPE_WATER; }
+	public function isWater() { return $this->getType() == TerritoryTemplateTableMap::COL_TYPE_WATER; }
 
 	/**
 	 * Old system used constants, while propel uses enums, so overloading
 	 * this for backwards compatibility
 	 *
 	 * Maybe I should use COL_TYPE_LAND and COL_TYPE_WATER instead of magic
-	 * strings
+	 * strings.
+	 *
+	 * This is here to help input Google Spreadsheet values
+	 *
 	 **/
 	public function setType($type) {
-		if ($type == TERR_LAND) {
-			parent::setType('land');
-		} elseif ($type == TERR_WATER) {
-			parent::setType('water');
-		} elseif (strtolower($type) === 'land' || strtolower($type) === 'water') {
+		$type = strtolower($type);
+		if ($type == TerritoryTemplateTableMap::COL_TYPE_LAND || $type == TerritoryTemplateTableMap::COL_TYPE_WATER || $type == TerritoryTemplateTableMap::COL_TYPE_COAST) {
 			parent::setType($type);
+		} elseif ($type == TERR_LAND) {
+			parent::setType(TerritoryTemplateTableMap::COL_TYPE_LAND);
+		} elseif ($type == TERR_WATER) {
+			parent::setType(TerritoryTemplateTableMap::COL_TYPE_WATER);
+		} elseif ($type == TERR_COAST) {
+			parent::setType(TerritoryTemplateTableMap::COL_TYPE_COAST);
 		} else {
 			trigger_error("Attempted to set invalid territory type: $type");
 		}
 	}
-	public function getType() { return parent::getType(); }
-
 	public function isNeighbour(iTerritory $neighbour) {
 		return array_key_exists($neighbour->getId(), $this->neighbours);
 	}
@@ -77,7 +91,7 @@ class TerritoryTemplate extends BaseTerritoryTemplate {
 	 */
 	public function setInitialOccupation(Empire $empire, Unit $unit) {
 		parent::setInitialOccupier($empire);
-		parent::setInitialUnit($unit->enum());
+		parent::setInitialUnit($unit->getUnitType());
 	}
 
 	/**

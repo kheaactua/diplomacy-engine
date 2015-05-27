@@ -47,7 +47,7 @@ class Game extends BaseGame {
 		//print_r($objs);
 		$ts = array();
 		foreach ($objs as $obj) {
-			$t = TerritoryTemplate::create($obj->name, $obj->type, false); // TODO fix supply center
+			$t = TerritoryTemplate::create($obj->name, $obj->type, $obj->has_supply?true:false);
 
 //global $config; $config->system->db->useDebug(true);
 			$empire = EmpireQuery::create()->filterByGame($this)->filterByAbbr($obj->empire_start)->findOne();
@@ -67,11 +67,16 @@ class Game extends BaseGame {
 			foreach ($obj->neighbours as $nid) {
 				$n = $ts[$nid]; // again, using the spreadsheet IDs here
 				$t->addNeighbour($n);
+
+				// Now that neighbours are in, lets work on converting some of these
+				// 'land's to 'coast's
+				if ($t->getType() === 'land' && $n->getType() === 'water')
+					$t->setType('coast');
+
 			}
 			$t->save();
 		}
 		$this->save();
-		//return $ts;
 	}
 
 	/**

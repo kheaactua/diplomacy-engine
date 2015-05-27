@@ -5,6 +5,7 @@ namespace DiplomacyOrm;
 use DiplomacyOrm\Base\Turn as BaseTurn;
 use DiplomacyOrm\Move;
 use DiplomacyOrm\Support;
+use DiplomacyOrm\InvalidUnitException;
 
 use Propel\Runtime\ActiveQuery\Criteria;
 
@@ -19,7 +20,7 @@ use Propel\Runtime\ActiveQuery\Criteria;
  *
  */
 class Turn extends BaseTurn {
-	const dt = 2; // Timesteps per year.  Half of this is hard programmed in (Seasons)
+	const dt = 4; // Timesteps per year.  Half of this is hard programmed in (Seasons)
 
 	protected $mlog;
 
@@ -56,7 +57,7 @@ $this->mlog->debug("$l instanceof Retreat = ". ($l instanceof Retreat ? 'yes':'n
 				throw new TurnClosedToOrdersException($this . ' status is "'. $this->getStatus() .'", can only accept orders on "open" state');
 			}
 		}
-		if (is_null($l->getUnit())) {
+		if (is_null($l->getUnitType())) {
 			// Guess at the unit based on game state
 			$states = StateQuery::create()
 				->filterByTurn($this)
@@ -65,9 +66,12 @@ $this->mlog->debug("$l instanceof Retreat = ". ($l instanceof Retreat ? 'yes':'n
 				->find();
 
 			if (count($states) == 1) {
-				$l->setUnit($states[0]->getUnit());
+				if (!is_object($states[0]->getUnit()))
+					throw new \DiplomacyOrm\InvalidUnitException("It seems that there is no unit on territory ". $l->getSource()->getTerritory() . ", cannot issue order.");
+
+				$l->setUnitType($states[0]->getUnit()->getUnitType());
 			} else {
-				throw new \DiplomacyEngine\InvalidUnitException("Could not determine unit");
+				throw new \DiplomacyOrm\InvalidUnitException("Could not determine unit");
 			}
 		}
 		return parent::addOrder($l);
@@ -412,20 +416,30 @@ print "Result $retreats\n";
 		// --------------------------
 		// Move orders
 
-		$orders = OrderQuery::create()
+		$orders = MoveQuery::create()
 			->filterByTurn($this)
 			->filterByStatus('succeeded')
-			->filterByDescendantClass('%Move', Criteria::LIKE)
 			->find();
 		foreach ($orders as $o) {
 			$o = Order::downCast($o);
 			print "Executing $o\n";
 
+			// The unit we're going to move.
+			$unit = $o->getSource()->getUnit();
+
 			$nextSourceState = $this->getTerritoryNextState($o->getSource()->getTerritory());
-			$nextSourceState->setUnit('vacant'); // Keep occupying the territory, but the unit is moving
+			$nextSourceState->setUnit(null); // Keep occupying the territory, but the unit is moving
 
 			$nextDestState   = $this->getTerritoryNextState($o->getDest()->getTerritory());
-			$nextDestState->setOccupation($o->getSource()->getOccupier(), $o->getSource()->getUnit());
+			$nextDestState->setOccupation($o->getSource()->getOccupier(), $unit);
+
+			$unit->setState($nextDestState);
+			$unit->setLastState($nextSourceState);
+
+			if ($unit->getUnitType() == 'fleet' && $o->getSoure()->getTerritory()->getType() === 'water') {
+				$this->mlog->debug("Setting last water territory on $unit to ". $o->getSoure()->getTerritory() ." on there move to ". $nextDestState->getTerritory() . "");
+				$unit->setLastWater($o->getSoure()->getTerritory());
+			}
 
 			$o->addToTranscript('Executed');
 		}
@@ -491,8 +505,8 @@ print "Result $retreats\n";
 //$config->system->db->useDebug(true);
 		$nextTurn = Turn::create($this->getMatch(), $this);
 		$sql = "INSERT INTO match_state "
-			. " (match_id, turn_id, territory_id, occupier_id, unit) "
-			." SELECT :match_id_static, :next_turn_id, territory_id, occupier_id, unit "
+			. " (match_id, turn_id, territory_id, occupier_id, unit_id) "
+			." SELECT :match_id_static, :next_turn_id, territory_id, occupier_id, unit_id "
 			."  FROM match_state "
 			." WHERE match_id = :match_id AND turn_id = :current_turn_id ";
 		$stmt = $config->system->db->prepare($sql);
@@ -595,7 +609,7 @@ print "$retreat satisfies the required retreat from {$rr['territory']} by {$rr['
 	public function __toArray() {
 		$ret = array(
 			'code' => $this->status,
-			'status' => $this->statusStromg(),
+			'status' => $this->statusString(),
 			'requiredRetreats' => array(), // figure out structure later
 		);
 	}

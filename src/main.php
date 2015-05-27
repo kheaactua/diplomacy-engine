@@ -43,7 +43,7 @@ if ($order instanceof Order) {
 // Clear the DB first
 use Propel\Runtime\Propel;
 $con = Propel::getWriteConnection(DiplomacyOrm\Map\GameTableMap::DATABASE_NAME);
-$sql = "DELETE FROM game";
+$sql = "DELETE FROM game WHERE name<>'test'";
 $stmt = $con->prepare($sql);
 $stmt->execute();
 
@@ -51,24 +51,18 @@ $stmt->execute();
 
 // Create or use
 $game = null;
-$games = GameQuery::create()->findByName('test');
-if (count($games) == 1) {
-	$game = $games[0];
-} elseif (!count($games)) {
-	$game_name = 'test';
-	$p_objs = json_decode(file_get_contents($config->host->data . "/$game_name/empires.json"), false);
-	$t_objs = json_decode(file_get_contents($config->host->data . "/$game_name/territories.json"), false);
+$games = GameQuery::create()->filterByName('test%', Criteria::LIKE);
+$game_base_name = 'test';
+$game_name = $game_base_name . '_' . $games->count();
+$p_objs = json_decode(file_get_contents($config->host->data . "/$game_base_name/empires.json"), false);
+$t_objs = json_decode(file_get_contents($config->host->data . "/$game_base_name/territories.json"), false);
 
 
-	$game = Game::create($game_name, 1861, 'spring');
-	$game->loadEmpires($p_objs);
-	$game->loadTerritories($t_objs);
+$game = Game::create($game_name, 1861, 'spring');
+$game->loadEmpires($p_objs);
+$game->loadTerritories($t_objs);
 
-	$game->save();
-} else {
-	trigger_error("A duplicate got created!");
-}
-
+$game->save();
 
 // $texas   = Territory::findTerritoryByName($territories, 'Texas');
 // $sequoia = Territory::findTerritoryByName($territories, 'Sequoia');
@@ -99,7 +93,7 @@ foreach ($t_names as $n) {
 }
 
 
-$case = 5;
+$case = 4;
 switch ($case) {
 	case 1;
 		// Test move conflict
@@ -117,7 +111,7 @@ switch ($case) {
 	case 3:
 //$config->system->db->useDebug(true);
 		try {
-			$turn->addOrder(Order::interpretText("MOVE army A-B", $match, $red));
+			$turn->addOrder(Order::interpretText("MOVE A-B", $match, $red));
 		} catch (\DiplomacyOrm\InvalidOrderException $e) {
 			print "[{$config->ansi->red}Error{$config->ansi->clear}]: Red cannot MOVE A-B: ". $e->getMessage() . "\n";
 			exit;
@@ -129,15 +123,15 @@ switch ($case) {
 		break;
 	case 4:
 		// Test the case with multiple contendors stalemat. standoff.svg
-		$turn->addOrder(Order::interpretText("MOVE army A-B", $match, $red));
+		$turn->addOrder(Order::interpretText("MOVE A-B", $match, $red));
 		$turn->addOrder(Order::interpretText("SUPPORT RED F-B", $match, $red));
-		$turn->addOrder(Order::interpretText("MOVE army I-B", $match, $green));
+		$turn->addOrder(Order::interpretText("MOVE I-B", $match, $green));
 		$turn->addOrder(Order::interpretText("SUPPORT GREEN H-B", $match, $green));
 
 		// RED and GREEN should loose in statemates, B should belong to BLUE
 		break;
 	case 5:
-		$turn->addOrder(Order::interpretText("MOVE army E-C", $match, $green));
+		$turn->addOrder(Order::interpretText("MOVE E-C", $match, $green));
 
 }
 $turn->save();
