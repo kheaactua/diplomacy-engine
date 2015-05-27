@@ -20,7 +20,9 @@ use DiplomacyOrm\Game;
 use DiplomacyOrm\GameQuery;
 use DiplomacyOrm\Order;
 use DiplomacyOrm\OrderQuery;
-use DiplomacyOrm\ResolutionResult;
+use DiplomacyOrm\TurnResult;
+use DiplomacyOrm\UnitSupplyResolver;
+use DiplomacyOrm\RetreatResolver;
 
 use DiplomacyOrm\Move;
 use DiplomacyOrm\Support;
@@ -138,7 +140,11 @@ $turn->save();
 
 $result = $turn->processOrders();
 $turn->printOrders();
-if ($result->getStatus() == ResolutionResult::RETREATS_REQUIRED) {
+print_r($result->__toArray());
+//print json_encode($result->__toArray());
+
+return;
+if ($result->getStatus() == RetreatResolver::RETREATS_REQUIRED) {
 	print $result;
 
 	$retreat = Retreat::createNS($blue, $t_b, $t_c);
