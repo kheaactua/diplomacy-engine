@@ -35,16 +35,16 @@
 			});
 		}
 
-		this.setEmpire = function(matchId, empireId){
+		$scope.setEmpire = function(matchId, empireId){
 			this.selectedEmpire=$scope.empires[empireId];
 
 			//Get territories for this match
 			$http.get( server + '/api/rest/matches/'+matchId+'/empires/'+empireId+'/territories?include_neighbours=1').success(function(response){
-				matchesCtrl.territories = response.data.data;
+				$scope.territories = response.data.data;
 			});
 		}
 
-		this.sendOrders = function(matchId, empireId, ordersText){
+		$scope.sendOrders = function(matchId, empireId, ordersText){
 			var req = server + '/api/rest/matches/'+matchId+'/empires/'+empireId+'/orders?order_str='+escape(ordersText);
 			console.debug(req);
 

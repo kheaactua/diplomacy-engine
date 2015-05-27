@@ -10,8 +10,8 @@
 	<div class="col-md-6" ng-controller="MatchesController">
 		<div class='form-group'>
 			<label for='match'>All Matches</label>
-			<select class="form-control" ng-model="matchId" name="match" id="match" ng-change="setMatch(matchId)">
-				<option ng-repeat='match in matches' value={{match.match_id}}>
+			<select class="form-control" ng-model="matchId" name="match" ng-change="setMatch(matchId)">
+            <option ng-repeat="(key, match) in matches track by $index" value="{{match.match_id}}">
 					{{match.name}}
 				</option>
 			</select>
@@ -19,8 +19,8 @@
 
 		<div class="form-group">
 			<label for="empire">Empires in current match</label>
-			<select class="form-control" ng-model="empireId" name="empire" id="empire" ng-change=".setEmpire(matchId, empireId);">
-				<option ng-repeat="empire in empires" value="{{empire.empire_id}}">
+			<select class="form-control" ng-model="empireId" name="empire" id="empire" ng-change="setEmpire(matchId, empireId);">
+				<option ng-repeat="empire in empires track by $index" value="{{empire.empire_id}}">
 					{{empire.name}}
 				</option>
 			</select>
