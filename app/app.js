@@ -43,10 +43,11 @@
 		}
 		
 		this.sendOrders = function(matchId, empireId, ordersText){
-			$window.alert(server + '/api/rest/matches/'+matchId+'/empires/'+empireId+'/orders?order_str='+escape(ordersText));
+			var req = server + '/api/rest/matches/'+matchId+'/empires/'+empireId+'/orders?order_str='+escape(ordersText);
+			console.debug(req);
 			
-			$http.get( server + '/api/rest/matches/'+matchId+'/empires/'+empireId+'/orders?order_str='+escape(ordersText)).success(function(response){
-				alert(response.data);
+			$http.get(req).success(function(response){
+				console.debug(response);
 			});
 		}
 	}]);
