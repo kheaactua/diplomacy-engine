@@ -43,7 +43,7 @@
 		}
 		
 		this.sendOrders = function(matchId, empireId, ordersText){
-			$window.alert(server + '/api/rest/matches/'+matchId+'/empires/'+empireId+'/orders?order_str='+escape(ordersText));
+			$window.console.log(server + '/api/rest/matches/'+matchId+'/empires/'+empireId+'/orders?order_str='+escape(ordersText));
 			
 			$http.get( server + '/api/rest/matches/'+matchId+'/empires/'+empireId+'/orders?order_str='+escape(ordersText)).success(function(response){
 				alert(response.data);
