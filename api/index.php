@@ -1,9 +1,7 @@
 <?php
-
 require_once(dirname(__FILE__) . '/../config/config.php');
 
 global $MLOG;
-$MLOG->debug("here");
 
 include_once('error_handler.php');
 
@@ -25,7 +23,10 @@ if (!count($_REQUEST) && strlen($rawinput)) {
 	parse_str($rawinput, $arr);
 	$_REQUEST['putData'] = $arr;
 	$_POST['putData'] = $arr;
+} else {
+	$_REQUEST['putData'] = '';
 }
+
 
 ////////////////////////////////////////////////////////////////////////
 //   DEBUG STUFF
@@ -62,23 +63,27 @@ $str[] = "Raw input: " . print_r($rawinput , true);
 $MLOG->addDebug(join("\n", $str));
 
 ////////////////////////////////////////////////////////////////////////
-//   DEBUG STUFF
+//  /DEBUG STUFF
 ////////////////////////////////////////////////////////////////////////
 
 try {
-	$RestMatchRoutes = Server::create('/rest/games/', new \DiplomacyEngineRestApi\v1\Game)
+
+	$RestGameRoutes = Server::create('/rest/games', new \DiplomacyEngineRestApi\v1\Game)
 		->addGetRoute('', 'doGetGames')
 		;
 
 	$RestMatchRoutes = Server::create('/rest/matches/', new \DiplomacyEngineRestApi\v1\Match)
 		->addPostRoute('', 'doCreateMatch')
-		->addGetRoute('', 'doGetEmpires')
+		->addGetRoute( '', 'doGetMatches')
+		->addGetRoute( '([0-9]+)', 'doGetEmpires')
+		->addPostRoute('([0-9]+)/empires/([0-9]+)/orders', 'doAddOrder')
+		->addGetRoute( '([0-9]+)/empires/([0-9]+)/territories', 'doGetEmpireTerritoryMap')
+		->addGetRoute( '([0-9]+)/territories', 'doGetTerritories')
+		->addPostRoute('([0-9]+)/empires/([0-9]+)/orders/validate', 'doValidate')
 		;
 
-	$RestOrderRoutes = Server::create('/rest/matches/', new \DiplomacyEngineRestApi\v1\Order)
-		//->addGetRoute('([0-9]+)', 'doGetOrder')
-		->addPostRoute('([0-9]+)/orders', 'doAddOrder')
-		//->addDeleteRoute('([0-9]+)/orders/([0-9]+)', 'doDeleteOrder')
+	$RestTerritoryRoutes = Server::create('/rest/territories', new \DiplomacyEngineRestApi\v1\Territory)
+		->addGetRoute( '([0-9]+)', 'doGetTerritory')
 		;
 
 	// RPC routes
@@ -87,24 +92,24 @@ try {
 		->addGetRoute('([0-9]+)/resolve', 'doResolve')
 		;
 
-	$RpcOrderRoutes = Server::create('/rpc/orders/', new \DiplomacyEngineRestApi\v1\Order)
-		->addGetRoute('([0-9]+)/validate', 'doValidate')
+
+
+	// Just for testing
+	$miscRoutes = Server::create('/', new \DiplomacyEngineRestApi\v1\RouteHandler)
+		->addOptionsRoute('ping', function () { return; })
+		->addOptionsRoute('(.*)', function ($p1=null) { return; })
 		;
 
-
-	// // Not 100% sure I need this..
-	// $miscRoutes = Server::create('/', new \DiplomacyEngineRestApi\v15\RouteHandler)
-	// 	//->addOptionsRoute('ping', function () { return; })
-	// 	//->addOptionsRoute('(.*)', function ($p1=null) { return; })
-	// 	;
-
-	$routes = array($RestMatchRoutes, $RestMatchRoutes, $RestOrderRoutes, $RpcMatchRoutes, $RpcOrderRoutes, $RpcOrderRoutes);
-	//$routes = array($RpcUserRoutes);
+	$routes = array($RestGameRoutes, $RestMatchRoutes, $RestTerritoryRoutes, $RpcMatchRoutes, $miscRoutes);
+	// $routes = array($RestGameRoutes);
 	foreach ($routes as $r) {
 		$r->setExceptionHandler($exHandlerFactory($config, $r));
 		$r->setDebugMode($config->host->mode==='dev');
 		$r->setFallbackMethod('defaultRoute');
-		if ($config->host->INTERFACE_TYPE === 'web') $r->run(); // If it's CLI, we're simulating and don't want this
+		if ($config->host->INTERFACE_TYPE === 'web') {
+			//$MLOG->debug("Running ". get_class($r) ."");
+			$r->run(); // If it's CLI, we're simulating and don't want this
+		}
 	}
 
 //} catch (\Propel\Runtime\Exception\PropelException $e) {
@@ -121,8 +126,10 @@ try {
 }
 
 
-//print_r($RpcUserRoutes->describe());
-//$RpcUserRoutes->simulateCall('/rpc/user/login?network=mayofest&token=whateva', 'OPTIONS');
+//print_r($RestGameRoutes->describe());
+//print $RestGameRoutes->simulateCall('/rest/games', 'GET');
+//print $RestMatchRoutes->simulateCall('/rest/matches', 'GET');
+//$RestGameRoutes->simulateCall(' /rest/games/', 'OPTIONS');
 //$uRoutes->simulateCall('/user/1/order/createNewMembershipOrder?memtype=attendant', 'get');
 //$uRoutes->simulateCall('/user/lookUp', 'get');
 //$rpcRoutes->simulateCall('/rpc/user/addCredentials', 'post');

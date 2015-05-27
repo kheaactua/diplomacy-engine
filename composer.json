@@ -1,10 +1,16 @@
 {
 	"name": "matt/diplomacy-engine",
 	"description": "Diplomacy order resolving engine",
+	"repositories": [
+		{
+			"url": "https://github.com/kheaactua/php-rest-service.git",
+			"type": "git"
+		}
+	],
 	"require": {
 		"php": ">=5.3.0",
 		"monolog/monolog": ">=1.0",
-		"marcj/php-rest-service": "*",
+		"kheaactua/php-rest-service": "*",
 		"kheaactua/configurator": ">=0.2.0"
 	},
 	"minimum-stability": "dev",

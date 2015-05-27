@@ -28,7 +28,7 @@ use Monolog\Handler\StreamHandler;
 $MLOG = new Logger('defaultLogger');
 //$log_level = $config->host->mode=='production' ? Logger::INFO : Logger::DEBUG;
 $log_level = Logger::DEBUG;
-$MLOG->pushHandler(new StreamHandler('/tmp/diplomacy.log', $log_level));
+$MLOG->pushHandler(new StreamHandler($config->host->log_file, $log_level));
 Propel::getServiceContainer()->setLogger('defaultLogger', $MLOG);
 $config->setLog($MLOG);
 

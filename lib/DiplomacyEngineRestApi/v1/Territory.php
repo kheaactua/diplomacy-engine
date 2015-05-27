@@ -2,69 +2,46 @@
 
 namespace DiplomacyEngineRestApi\v1;
 
-use DiplomacyOrm\Match as MatchOrm;
-use DiplomacyOrm\MatchQuery;
-use DiplomacyOrm\State;
-use DiplomacyOrm\StateQuery;
-use DiplomacyOrm\Empire;
-use DiplomacyOrm\EmpireQuery;
-use DiplomacyOrm\Order;
-use DiplomacyOrm\TurnException;
-use DiplomacyOrm\OrderException;
-use DiplomacyOrm\InvalidOrderException;
-use DiplomacyOrm\ResolutionResult;
+use DiplomacyOrm\TerritoryTemplate;
+use DiplomacyOrm\TerritoryTemplateQuery;
 
-class Match extends RouteHandler {
+class Territory extends RouteHandler {
 
 	/**
-	 * I find my self doing this in almost every function, so
-	 * just get it done.
+	 * Little getter similar to the one in Match
 	 *
 	 * Does not catch any exceptions
-	 * @param int $match_id
+	 * @param int $territory_id
 	 * @param intent(INOUT) Response& Response
-	 * @return Match If no match was found, return null and fail the response appropriately
+	 * @return Match If no TerritoryTempalte was found, return null and fail the response appropriately
 	 */
-	protected function getMatch($match_id, Response &$resp) {
-		$match = MatchQuery::create()->findPk($match_id);
-		if (!($match instanceof MatchOrm)) {
-			$resp->fail(Response::INVALID_MATCH, "Invalid match $match_id");
+	protected function getTerritoryTemplate($territory_id, &$resp) {
+		$t = TerritoryTemplateQuery::create()->findPk($territory_id);
+		if (!($t instanceof TerritoryTemplate)) {
+			$resp->fail(Response::INVALID_MATCH, "Invalid territory $territory_id");
 			return null;
 		}
-		return $match;
-	}
-
-	/**
-	 * Getter for empire
-	 *
-	 * Does not catch any exceptions
-	 * @param int $empire_id
-	 * @param Match $match
-	 * @param intent(INOUT) Response& Response
-	 * @return Match If no match was found, return null and fail the response appropriately
-	 */
-	protected function getEmpire($empire_id, $match, Response &$resp) {
-		$empire = EmpireQuery::create()->findPk($empire_id);
-		if (!($empire instanceof Empire)) {
-			$resp->fail(Response::INVALID_MATCH, "Invalid empire $empire_id");
-			return null;
-		}
-		return $empire;
+		return $t;
 	}
 
 	/**
 	 * Get a list of all the matches in the DB.  Maybe later
 	 * filter them by "active" or whatever.
 	 *
-	 * return array array(array(match_id, match_name, created, last_updated, game_id))
+	 * @param int $territory_id ID
+	 * return array array('territory_name' =>, ..., 'neighbours' => array())
 	 */
-	public function doGetMatches() {
+	public function doGetTerritory($territory_id) {
 		$this->mlog->debug('['. __METHOD__ .']');
 		$resp = new Response();
-		$matches = MatchQuery::create()->find();
-		$resp->data = array();
-		foreach ($matches as $match) {
-			$resp->data[] = $match->__toArray();
+
+		$tt = $this->getTerritoryTemplate($territory_id, $resp);
+		if (is_null($tt)) return $resp;
+
+		$resp->data = array('territory' => $tt->__toArray(), 'neighbours' => array());
+		$neighbours = $tt->getNeighbours();
+		foreach ($neighbours as $n) {
+			$resp->data['neighbours'][] = $n->__toArray();
 		}
 		return $resp->__toArray();
 	}
@@ -264,11 +241,9 @@ class Match extends RouteHandler {
 	 *
 	 * @param int $match_id Match ID
 	 * @param int $empire_id Empire ID issuing the order
-	 * @param bool $include_neighbours Include the terrotories neighbours in the result.
 	 * @return array array(TerritoryTemplate, ...)
 	 */
-	public function doGetEmpireTerritoryMap($match_id, $empire_id, $include_neighbours=false) {
-		$resp = new Response();
+	public function doGetEmpireTerritoryMap($match_id, $empire_id) {
 		$match = $this->getMatch($match_id, $resp);
 		if (is_null($match)) return $resp;
 		$empire = $this->getEmpire($empire_id, $match, $resp);
@@ -283,62 +258,10 @@ class Match extends RouteHandler {
 
 		$territories = array();
 		foreach ($states as $state) {
-			$arr = array(
+			$territories[] = array(
 				'territory' => $state->getTerritory()->__toArray(),
 				'unit' => $state->getUnit(),
 			);
-
-			if ($include_neighbours) {
-				$neighbours = $state->getTerritory()->getNeighbours();
-				foreach ($neighbours as $n)
-					$arr['neighbours'][] = $n->__toArray();
-			}
-
-			$territories[] = $arr;
-		}
-		$resp->data = $territories;
-
-		return $resp->__toArray();
-	}
-
-	/**
-	 * Fetch the list of territories owned by an empire.
-	 *
-	 * @param int $match_id Match ID
-	 * @param bool $include_neighbours Include neighbours in the territory output.  This will substancially increase the size of the data
-	 * @return array array(TerritoryTemplate, ...)
-	 */
-	public function doGetTerritories($match_id, $include_neighbours = false) {
-		$resp = new Response();
-		$match = $this->getMatch($match_id, $resp);
-		if (is_null($match)) return $resp;
-
-		$states = StateQuery::create()
-			->filterByTurn($match->getCurrentTurn())
-			->find()
-		;
-
-		$territories = array();
-		foreach ($states as $state) {
-			$arr = $state->getTerritory()->__toArray();
-			if (!is_null($state->getOccupier())) {
-				$arr['occupier'] = $state->getOccupier()->__toArray();
-				$arr['unit'] = $state->getUnit();
-			} else {
-				$arr['occupier'] = '';
-				$arr['unit'] = 'none';
-			}
-
-			// Don't need, but might be nice to have for debugging/fixing
-			$arr['state_id'] = $state->getPrimaryKey();
-
-			if ($include_neighbours) {
-				$neighbours = $state->getTerritory()->getNeighbours();
-				foreach ($neighbours as $n)
-					$arr['neighbours'][] = $n->__toArray();
-			}
-
-			$territories[] = $arr;
 		}
 		$resp->data = $territories;
 

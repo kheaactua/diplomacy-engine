@@ -3,8 +3,6 @@
 namespace DiplomacyOrm;
 
 use DiplomacyOrm\Base\Game as BaseGame;
-use DiplomacyEngine\iEmpire;
-use DiplomacyEngine\Unit;
 use Propel\Runtime\ActiveQuery\Criteria;
 
 /**
@@ -49,12 +47,14 @@ class Game extends BaseGame {
 		//print_r($objs);
 		$ts = array();
 		foreach ($objs as $obj) {
-			$t = TerritoryTemplate::create($obj->name, $obj->type, false); // TODO fix supply center
+			$t = TerritoryTemplate::create($obj->name, $obj->type, $obj->has_supply?true:false);
 
+//global $config; $config->system->db->useDebug(true);
 			$empire = EmpireQuery::create()->filterByGame($this)->filterByAbbr($obj->empire_start)->findOne();
-			if ($empire instanceof iEmpire) {
+			if ($empire instanceof Empire) {
 				$t->setInitialOccupation($empire, new Unit($obj->starting_forces));
 			}
+//$config->system->db->useDebug(false);
 
 			$this->addGameTerritory($t);
 			$t->save();
@@ -67,11 +67,16 @@ class Game extends BaseGame {
 			foreach ($obj->neighbours as $nid) {
 				$n = $ts[$nid]; // again, using the spreadsheet IDs here
 				$t->addNeighbour($n);
+
+				// Now that neighbours are in, lets work on converting some of these
+				// 'land's to 'coast's
+				if ($t->getType() === 'land' && $n->getType() === 'water')
+					$t->setType('coast');
+
 			}
 			$t->save();
 		}
 		$this->save();
-		//return $ts;
 	}
 
 	/**
@@ -81,24 +86,23 @@ class Game extends BaseGame {
 	 *
 	 * @param $str Territory name, or abbreviation, or anything we put in
 	 *             the system that a user may use
+	 * @param Match Requires a match such that it can use the current turn,
+	 *              without this several results (one per turn) will be returned
+	 *              everytime
 	 * @param Empire Sometimes we can limit what territories might be
 	 *               being searched for by the empire.  In this case,
 	 *               use the game state to filter the results.
 	 * @return State
 	 * @throws TerritoryMatchException
 	 */
-	public function lookupTerritory($str, Match $match = null, Empire $empire = null) {
-//global $config; $config->system->db->useDebug(true);
-		$query = StateQuery::create();
-		if($match instanceof Match && $empire instanceof Empire) {
-			// Can't use _if/_endif because it would still attempt
-			// to evaluate $match, which in this case would be null
-			$query
-				-> filterByTurn($match->getCurrentTurn())
+	public function lookupTerritory($str, Match $match, Empire $empire = null) {
+global $config; $config->system->db->useDebug(true);
+		$query = StateQuery::create()
+			->filterByTurn($match->getCurrentTurn())
+			->_if($empire instanceof Empire)
 				->filterByOccupier($empire)
-			;
-		}
-		$query->join('State.Territory')
+			->_endif()
+			->join('State.Territory')
 			->useTerritoryQuery()
 				->filterByGame($this) // probably unnecessary
 				->filterByName($str.'%', Criteria::LIKE)
@@ -112,10 +116,12 @@ class Game extends BaseGame {
 		} elseif (count($ts) > 1) {
 			$match_names = [];
 			foreach ($ts as $t)
-				$match_names = $t->getTerritory()->getName();
+				$match_names[] = $t->getTerritory()->getName();
 			throw new MultiTerritoryMatchException("Multiple matches for $str: '". join("', '", $match_names) . "'");
 		} else {
-			throw new NoTerritoryMatchException("No match for $str");
+			$str = "No match for $str";
+			if (!is_null($empire)) $str .= ". Purhaps $empire does not own $str?";
+			throw new NoTerritoryMatchException($str);
 		}
 	}
 }

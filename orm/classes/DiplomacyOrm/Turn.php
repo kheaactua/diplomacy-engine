@@ -3,10 +3,9 @@
 namespace DiplomacyOrm;
 
 use DiplomacyOrm\Base\Turn as BaseTurn;
-use DiplomacyEngine\iTurn;
-use DiplomacyEngine\PlayerMap;
 use DiplomacyOrm\Move;
 use DiplomacyOrm\Support;
+use DiplomacyOrm\InvalidUnitException;
 
 use Propel\Runtime\ActiveQuery\Criteria;
 
@@ -21,11 +20,14 @@ use Propel\Runtime\ActiveQuery\Criteria;
  *
  */
 class Turn extends BaseTurn {
-	const dt = 2; // Timesteps per year.  Half of this is hard programmed in (Seasons)
+	const dt = 4; // Timesteps per year.  Half of this is hard programmed in (Seasons)
 
-	// /** Array representing the territories (but not Territory objects) used
-	//  * to help resolve the fate of the Territory objects. */
-	// protected $territories;
+	protected $mlog;
+
+	public function __construct() {
+		global $MLOG;
+		$this->mlog = $MLOG;
+	}
 
 	/**
 	 * Constructs a new turn.
@@ -36,6 +38,7 @@ class Turn extends BaseTurn {
 	public static function create(Match $match, Turn $last_turn = null) {
 		$o = new Turn;
 		$o->setMatch($match);
+		$o->setStatus('open');
 
 		if ($last_turn instanceof Turn) {
 			$o->setStep($last_turn->getStep()+1);
@@ -47,14 +50,14 @@ class Turn extends BaseTurn {
 	public function addOrder(Order $l) {
 		if ($this->getStatus() !== 'open') {
 			// One exception, retreats
-print "$l instanceof Retreat = ". ($l instanceof Retreat ? 'yes':'no') . "\n";
+$this->mlog->debug("$l instanceof Retreat = ". ($l instanceof Retreat ? 'yes':'no'));
 			if ($this->getStatus() === 'require_retreats' && $l instanceof Retreat) {
 				// Good
 			} else {
-				throw new TurnClosedToOrdersException($this . ' state is "'. $this->getStatus() .'", can only accept orders on "open" state');
+				throw new TurnClosedToOrdersException($this . ' status is "'. $this->getStatus() .'", can only accept orders on "open" state');
 			}
 		}
-		if (is_null($l->getUnit())) {
+		if (is_null($l->getUnitType())) {
 			// Guess at the unit based on game state
 			$states = StateQuery::create()
 				->filterByTurn($this)
@@ -63,9 +66,12 @@ print "$l instanceof Retreat = ". ($l instanceof Retreat ? 'yes':'no') . "\n";
 				->find();
 
 			if (count($states) == 1) {
-				$l->setUnit($states[0]->getUnit());
+				if (!is_object($states[0]->getUnit()))
+					throw new \DiplomacyOrm\InvalidUnitException("It seems that there is no unit on territory ". $l->getSource()->getTerritory() . ", cannot issue order.");
+
+				$l->setUnitType($states[0]->getUnit()->getUnitType());
 			} else {
-				throw new \DiplomacyEngine\InvalidUnitException("Could not determine unit");
+				throw new \DiplomacyOrm\InvalidUnitException("Could not determine unit");
 			}
 		}
 		return parent::addOrder($l);
@@ -255,11 +261,11 @@ print "Result $retreats\n";
 
 				if ($o instanceof Move) {
 					if ($o->getDest() == $state) {
-						$tally->inc($o->getEmpire());
+						$tally->inc($o->getEmpire(), $o);
 					}
 				} elseif ($o instanceof Support) {
 					if ($o->getDest()->getTerritory() == $state->getTerritory()) {
-						$tally->inc($o->getSupporting());
+						$tally->inc($o->getSupporting(), $o);
 					}
 				} elseif ($o instanceof Retreat) {
 					// Nothing to do
@@ -374,16 +380,13 @@ print "Result $retreats\n";
 		// that territories are adjacent
 
 		// --------------------------
-		// Move & Retreat orders
+		// Retreat orders
 
-global $config; $config->system->db->useDebug(true);
 		$orders = OrderQuery::create()
 			->filterByTurn($this)
+			->filterByStatus('succeeded')
 			->filterByDescendantClass('%Retreat', Criteria::LIKE)
-			->_or()
-			->filterByDescendantClass('%Move', Criteria::LIKE)
 			->find();
-global $config; $config->system->db->useDebug(false);
 		foreach ($orders as $o) {
 			$o = Order::downCast($o);
 			print "Executing $o\n";
@@ -411,9 +414,45 @@ global $config; $config->system->db->useDebug(false);
 		}
 
 		// --------------------------
+		// Move orders
+
+		$orders = MoveQuery::create()
+			->filterByTurn($this)
+			->filterByStatus('succeeded')
+			->find();
+		foreach ($orders as $o) {
+			$o = Order::downCast($o);
+			print "Executing $o\n";
+
+			// The unit we're going to move.
+			$unit = $o->getSource()->getUnit();
+
+			$nextSourceState = $this->getTerritoryNextState($o->getSource()->getTerritory());
+			$nextSourceState->setUnit(null); // Keep occupying the territory, but the unit is moving
+
+			$nextDestState   = $this->getTerritoryNextState($o->getDest()->getTerritory());
+			$nextDestState->setOccupation($o->getSource()->getOccupier(), $unit);
+
+			$unit->setState($nextDestState);
+			$unit->setLastState($nextSourceState);
+
+			if ($unit->getUnitType() == 'fleet' && $o->getSoure()->getTerritory()->getType() === 'water') {
+				$this->mlog->debug("Setting last water territory on $unit to ". $o->getSoure()->getTerritory() ." on there move to ". $nextDestState->getTerritory() . "");
+				$unit->setLastWater($o->getSoure()->getTerritory());
+			}
+
+			$o->addToTranscript('Executed');
+		}
+
+
+
+		// --------------------------
 		// Disband orders
 
-		$orders = OrderQuery::create()->filterByTurn($this)->filterByDescendantClass('%Disband', Criteria::LIKE)->find();
+		$orders = OrderQuery::create()->filterByTurn($this)
+			->filterByStatus('succeeded')
+			->filterByDescendantClass('%Disband', Criteria::LIKE)
+			->find();
 		foreach ($orders as $o) {
 			$o = Order::downCast($o);
 			print "Executing $o\n";
@@ -436,6 +475,11 @@ global $config; $config->system->db->useDebug(false);
 		$nextTurn->save();
 
 		$this->setStatus('complete');
+
+		// Move turn pointer to next turn
+		$this->getMatch()->next();
+
+		return new ResolutionResult;
 	}
 
 	/**
@@ -461,8 +505,8 @@ global $config; $config->system->db->useDebug(false);
 //$config->system->db->useDebug(true);
 		$nextTurn = Turn::create($this->getMatch(), $this);
 		$sql = "INSERT INTO match_state "
-			. " (match_id, turn_id, territory_id, occupier_id, unit) "
-			." SELECT :match_id_static, :next_turn_id, territory_id, occupier_id, unit "
+			. " (match_id, turn_id, territory_id, occupier_id, unit_id) "
+			." SELECT :match_id_static, :next_turn_id, territory_id, occupier_id, unit_id "
 			."  FROM match_state "
 			." WHERE match_id = :match_id AND turn_id = :current_turn_id ";
 		$stmt = $config->system->db->prepare($sql);
@@ -565,7 +609,7 @@ print "$retreat satisfies the required retreat from {$rr['territory']} by {$rr['
 	public function __toArray() {
 		$ret = array(
 			'code' => $this->status,
-			'status' => $this->statusStromg(),
+			'status' => $this->statusString(),
 			'requiredRetreats' => array(), // figure out structure later
 		);
 	}
@@ -602,6 +646,85 @@ print "$retreat satisfies the required retreat from {$rr['territory']} by {$rr['
 			$str .= "{$arr['territory']} {$arr['loser']} must retreat due to {$arr['winner']}'s victory.\n";
 		}
 		$str .= "\n";
+		return $str;
+	}
+}
+
+/**
+ * Little helper class to add up the 'winners' on a territory during order
+ * resolution.  Implementing stuff here, instead of a bunch of array code
+ * in the resolution function
+ */
+class PlayerMap {
+	protected $map;
+	protected $winner;
+	protected $original_occupier;
+	public function __construct(Empire $default = null) {
+		$this->map = array();
+
+		if (!is_null($default)) {
+//print "Adding default point to $default\n";
+			$this->original_occupier = $default;
+			$this->inc($default); // add starting 'defenders' point
+			$this->winner = $default; // Set as default winner
+		} else {
+			$this->winner = null;
+		}
+	}
+	public function inc(Empire $empire, Order $order = null) {
+		if (!array_key_exists($empire->getEmpireId(), $this->map))
+			$this->map[$empire->getEmpireId()] = array('tally' => 0, 'empire' => $empire, 'orders' => array(), 'lost' => false);
+
+//print "Incrementing $empire\n";
+		$this->map[$empire->getEmpireId()]['tally']++;
+		if (!is_null($order))
+			$this->map[$empire->getEmpireId()]['orders'][$order->getPrimaryKey()]=$order;
+	}
+	public function findWinner() {
+		// Iterate through the tallys, and see if any armies have tied.  Ties
+		// result in standoffs.  The one exception here is that ties with the
+		// current occupier yeild the current as the winner (or, aren't marked as
+		// losers here.)
+		foreach ($this->map as $empire_1_id=>&$arr1) {
+			foreach ($this->map as $empire_2_id=>&$arr2) {
+				if ($empire_1_id == $empire_2_id) continue;
+				if ($arr1['tally'] == $arr2['tally']) {
+					// We have a tie!
+					if ($empire_1_id == $this->original_occupier->getPrimaryKey()) {
+						foreach ($arr2['orders'] as $o) { $o->fail("Lost in tie to current occupier $this->original_occupier (e1)"); $o->save(); }
+						$arr2['lost'] = true;
+					} elseif ($empire_2_id == $this->original_occupier->getPrimaryKey()) {
+						foreach ($arr1['orders'] as $o) { $o->fail("Lost in tie to current occupier $this->original_occupier (e2)"); $o->save(); }
+						$arr1['lost'] = true;
+					} else {
+						foreach ($arr1['orders'] as $o) { $o->fail("Lost in stalemate to ". $arr2['empire'] . " (e3)"); $o->save(); }
+						foreach ($arr2['orders'] as $o) { $o->fail("Lost in stalemate to ". $arr1['empire'] . " (e4)"); $o->save(); }
+						$arr1['lost'] = true;
+						$arr2['lost'] = true;
+					}
+				}
+			}
+		}
+
+		// Now, find the winner.  Ignore any armies already marked as losers
+		$c = -1;
+		foreach ($this->map as $empire_id=>$arr) {
+			if ($arr['lost'] !== true && $arr['tally'] > $c) {
+//print "{$arr['empire']}={$arr['tally']} > $c\n";
+				$c = $arr['tally'];
+				$this->winner = $arr['empire'];
+			}
+		}
+		return $this;
+	}
+	public function winner() {
+		return $this->winner;
+	}
+	public function __toString() {
+		$str = '';
+		foreach ($this->map as $arr) {
+			$str .= str_pad($arr['empire'], 12) . ' ' . sprintf('%0.2d', $arr['tally']) . ($arr['empire'] == $this->winner ? ' (winner)':'') . "\n";
+		}
 		return $str;
 	}
 }

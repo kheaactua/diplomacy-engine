@@ -3,58 +3,6 @@
 namespace DiplomacyEngine;
 use DiplomacyOrm\Map\StateTableMap;
 
-// Deprecated
-define('UNIT_ARMY', StateTableMap::COL_UNIT_ARMY);
-define('UNIT_FLEET', StateTableMap::COL_UNIT_FLEET);
-define('UNIT_NONE', StateTableMap::COL_UNIT_NONE);
-
-/**
- * Tiny class for unit type
- */
-class Unit {
-	protected $type;
-	public function __construct($type = null) {
-		if (strtolower($type) == 'a' || trim(strtolower($type)) == 'army' || $type == UNIT_ARMY || $type == StateTableMap::COL_UNIT_ARMY)
-			$this->type = StateTableMap::COL_UNIT_ARMY;
-		elseif (strtolower($type) == 'f' || trim(strtolower($type)) == 'fleet' || $type == UNIT_FLEET || $type == StateTableMap::COL_UNIT_FLEET)
-			$this->type = StateTableMap::COL_UNIT_FLEET;
-		elseif (is_null($type) || $type == StateTableMap::COL_UNIT_NONE)
-			$this->type = StateTableMap::COL_UNIT_NONE;
-		else {
-			$this->type = StateTableMap::COL_UNIT_NONE;
-			throw new InvalidUnitException('Must specify unit type, "'. $type .'" provided.');
-		}
-	}
-	public function __toString() {
-		switch ($this->type) {
-			case StateTableMap::COL_UNIT_ARMY:
-				return "Army";
-			case StateTableMap::COL_UNIT_FLEET:
-				return "Fleet";
-			default:
-				return "n/a";
-		}
-	}
-
-	/**
-	 * Used to give the value to the propel enum
-	 */
-	public function enum() {
-		return $this->type;
-		// switch ($this->type) {
-		// 	case UNIT_ARMY:
-		// 		return StateTableMap::COL_UNIT_ARMY;
-		// 	case UNIT_FLEET:
-		// 		return StateTableMap::COL_UNIT_FLEET;
-		// 	default:
-		// 		return StateTableMap::COL_UNIT_NONE;
-		// }
-	}
-	public function isValid() {
-		return $this->type != StateTableMap::COL_UNIT_NONE;
-	}
-}
-
 interface iEmpire {
 	/** Serialize to string **/
 	public function __toString();
@@ -63,8 +11,6 @@ interface iEmpire {
 	public function getEmpireId();
 }
 
-class EmpireException extends \Exception { };
-class InvalidUnitException extends EmpireException { };
 
 // going to be replaced with a propel class
 // class Empire implements iEmpire {

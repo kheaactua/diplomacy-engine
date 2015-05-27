@@ -3,7 +3,6 @@
 namespace DiplomacyOrm;
 
 use DiplomacyOrm\Base\Match as BaseMatch;
-use DiplomacyEngine\Unit;
 
 /**
  * Skeleton subclass for representing a row from the 'match' table.
@@ -35,7 +34,15 @@ class Match extends BaseMatch {
 		// Copy over the territories to our first state
 		$tts = $game->getGameTerritories();
 		foreach ($tts as $tt) {
-			$state = State::create($game, $m, $turn, $tt, $tt->getInitialOccupier(), new Unit($tt->getInitialUnit()));
+			$state = State::create($game, $m, $turn, $tt);
+
+			if ($tt->getInitialOccupier() instanceof Empire) {
+				$unit = new Unit($tt->getInitialUnit());
+ 				$unit->setMatch($m);
+				$unit->setState($state);
+
+				$state->setOccupation($tt->getInitialOccupier(), $unit);
+			}
 		}
 		$m->save();
 		return $m;
@@ -45,12 +52,17 @@ class Match extends BaseMatch {
 	 * Create a new turn and point currentTurn at it
 	 */
 	public function next() {
-		if ($this->getCurrentTurn()->getStatus() == 'complete') {
-			$this->setCurrentTurn($this->getNextTurn());
-			$this->setNextTurn(null);
-		} else {
+		if ($this->getCurrentTurn()->getStatus() != 'complete')
 			throw new TurnNotCompleteException("Current turn currently has a status of '". $this->getCurrentTurn()->getStatus() . "', cannot proceed.");
-		}
+
+		print "next turn: ". gettype($this->getNextTurn()) . "\n";
+		if (!($this->getNextTurn() instanceof Turn))
+			throw new TurnNotCompleteException("No next turn has been initialized");
+
+
+		// else ...
+		$this->setCurrentTurn($this->getNextTurn());
+		$this->setNextTurn(null);
 	}
 
 	/*
@@ -73,11 +85,31 @@ class Match extends BaseMatch {
 		$str .= str_pad('Territory', 30) . str_pad('Empire', 12) . str_pad('Unit', 10) . "\n";
 		$str .= str_pad('', 29, '-') . ' ' . str_pad('', 11, '-') . ' '. str_pad('', 10, '-') . "\n";
 		foreach ($states as $s) {
-			$str .= str_pad($s->getTerritory(), 30) . str_pad($s->getOccupier(), 12) . new Unit($s->getUnit()) . "\n";
+			if ($s->getOccupier() instanceof Empire && is_null($s->getUnit()))
+				$unit = 'Vacant';
+			else
+				$unit = $s->getUnit();
+			$unit = $s->getUnit() instanceof Unit ? $unit : '';
+			$str .= str_pad($s->getTerritory(), 30) . str_pad($s->getOccupier(), 12) . $unit . "\n";
 		}
 		return $str;
 	}
 
+	/** Mostly used for preparing an array to serialize into JSON
+	 * and sending to the client
+	 */
+	public function __toArray() {
+		$arr = array(
+			'match_id'   => $this->getPrimaryKey(),
+			'name'       => $this->getName(),
+			'turn'       => $this->getCurrentTurn(),
+			'game_id'    => $this->getGame()->getPrimaryKey(),
+			'game'       => $this->getGame()->getName(),
+			'created_on' => $this->getCreatedOn(),
+			'updated_at' => $this->getUpdatedAt(),
+		);
+		return $arr;
+	}
 }
 
 // vim: ts=3 sw=3 noet :
