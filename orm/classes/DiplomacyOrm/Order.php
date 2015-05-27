@@ -90,8 +90,14 @@ class Order extends BaseOrder {
 
 	/** Marks the order as failed */
 	public function fail($reason='') {
-		$this->addToTranscript($reason);
-		$this->setStatus('failed');
+		// Once an order is failed, it's failed..
+		// Sometimes the loops will fail an order without checking
+		// if it's failed and we'll get duplicate messages in here.
+		// Another way to solve this would be more efficient code. :)
+		if (!$this->failed()) {
+			$this->addToTranscript($reason);
+			$this->setStatus('failed');
+		}
 	}
 
 	public function addToTranscript($str = '') {
@@ -124,7 +130,9 @@ class Order extends BaseOrder {
 // TODO make exception for CONVOYS
 		if ($this->getSource()->getOccupier() != $this->getEmpire()) {
 			$this->fail($this->getEmpire() . " does not occupy ". $this->getSource()->getTerritory());
+			return false;
 		}
+		return true;
 	}
 
 	/**

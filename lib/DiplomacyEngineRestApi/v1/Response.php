@@ -13,15 +13,23 @@ class Response {
 	const INVALID_MATCH=-3;
 	const INVALID_EMPIRE=-5;
 	const INVALID_GAME=-4;
+	const TURN_ERROR=-50;
 
 	public $code;
 	public $msg;
 	public $data;
 
-	public __construct($code = self::SUCCESS, $msg = '', $data = null) {
+	public function __construct($code = self::SUCCESS, $msg = '', $data = null) {
 		$this->code = $code;
 		$this->msg  = $msg;
 		$this->data = $data;
+	}
+
+	public function __toString() {
+		$str = "Response:\n";
+		$str .= "\t- code: $this->code\n";
+		$str .= "\t- msg: $this->msg\n";
+		return $str;
 	}
 
 	public function __toArray() {

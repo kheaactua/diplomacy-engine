@@ -3,7 +3,6 @@
 namespace DiplomacyOrm;
 
 use DiplomacyOrm\Base\Support as BaseSupport;
-use DiplomacyEngine\Unit;
 use DiplomacyEngine\MultiTerritory;
 
 /**
@@ -77,7 +76,16 @@ class Support extends BaseSupport implements MultiTerritory {
 			// }
 
 			// Match ally
-			$ally = EmpireQuery::create()->filterByGame($match->getGame())->findOneByAbbr($matches[2]);
+// global $config; $config->system->db->useDebug(true);
+			$ally = EmpireQuery::create()->filterByGame($match->getGame())
+				->filterByAbbr($matches[2])
+				->_or()
+				->filterByName($matches[2])
+				->_or()
+				->filterByNameShort($matches[2])
+				->findOne()
+			;
+// $config->system->db->useDebug(false);
 // print "ally = ". get_class($ally) . "\n";
 			if (!($ally instanceof Empire)) {
 				throw new InvalidOrderException("Cannot match ally {$matches[2]}");
@@ -93,7 +101,7 @@ class Support extends BaseSupport implements MultiTerritory {
 			try {
 				// Cannot specify ally here to help the match, as the ally doesn't
 				// currently occupy the destination territory
-				$dest = $match->getGame()->lookupTerritory($matches[4]);
+				$dest = $match->getGame()->lookupTerritory($matches[4], $match);
 			} catch (TerritoryMatchException $ex) {
 				throw new InvalidOrderException($ex->getMessage());
 			}

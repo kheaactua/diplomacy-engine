@@ -3,9 +3,6 @@
 namespace DiplomacyOrm;
 
 use DiplomacyOrm\Base\State as BaseState;
-use DiplomacyEngine\iTerritory;
-use DiplomacyEngine\Unit;
-use DiplomacyEngine\iEmpire;
 
 /**
  * Skeleton subclass for representing a row from the 'match_state' table.
@@ -29,6 +26,10 @@ class State extends BaseState {
 		$o->setTurn($turn);
 		$o->setTerritory($territory);
 		if (!is_null($occupier)) {
+			// Not sure this is enough for the foreign keys
+			if (is_null($unit))
+				throw new InvalidUnitException('Must specify unit in occupation.');
+			$unit->setMatch($match);
 			$o->setOccupation($occupier, $unit);
 		}
 		$o->save();
@@ -43,22 +44,16 @@ class State extends BaseState {
 			return sprintf("[Turn: %s] Territory %s occupied by %s's %s", $this->getTurn(), $this->getTerritory(), $this->getOccupier(), $this->getUnit());
 	}
 
-	public function setOccupation(iEmpire $occupier = null, $unit = null) {
+	public function setOccupation(Empire $occupier = null, $unit = null) {
 		$this->setOccupier($occupier);
 		$this->setUnit($unit);
-	}
 
-	public function setUnit($v) {
-		if (is_null($v))
-			$unit_str = 'none';
-		elseif ($v instanceof Unit)
-			$unit_str = $v->enum();
-		elseif (is_string($v))
-			$unit_str = $v;
-		else
-			trigger_error('Do not understand input to unit.');
+		// This is lazy, and might cause sneaky errors.  I SHOULD be sure when the units set
+		if (!($unit->getState() instanceof State))
+			$unit->setState($this);
 
-		parent::setUnit($unit_str);
+		if (!($unit->getMatch() instanceof Match))
+			$unit->setMatch($this->getMatch());
 	}
 
 	/**
