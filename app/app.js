@@ -13,7 +13,7 @@
 		});
 	}]);
  
-	app.controller('MatchesController', ['$http', '$scope', function($http, $scope){
+	app.controller('MatchesController', ['$http', '$scope', '$window', function($http, $scope, $window){
   
 		$scope.action = 'hold';
   
@@ -41,8 +41,15 @@
 				matchesCtrl.territories = response.data.data;
 			});
 		}
+		
+		this.sendOrders = function(matchId, empireId, ordersText){
+			$window.alert(ordersText);
+			
+			$http.get( server + '/api/rest/matches/'+matchId+'/empires/'+empireId+'/orders?'+escape(ordersText)).success(function(response){
+				alert(response.data.data);
+			});
+		}
 	}]);
-	
 	
 	app.directive("neighbourTerritories", function(){
 		return {
