@@ -45,7 +45,8 @@ if ($order instanceof Order) {
 // Clear the DB first
 use Propel\Runtime\Propel;
 $con = Propel::getWriteConnection(DiplomacyOrm\Map\GameTableMap::DATABASE_NAME);
-$sql = "DELETE FROM game WHERE name<>'test'";
+//$sql = "DELETE FROM game WHERE name<>'test'";
+$sql = "DELETE FROM game";
 $stmt = $con->prepare($sql);
 $stmt->execute();
 
