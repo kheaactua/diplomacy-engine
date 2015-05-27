@@ -61,6 +61,7 @@ if (file_exists(dirname(__FILE__).'/host.local.php')) {
 	$config->host->db->dsn = '';
 	$config->host->BASE_DIR = '';
 	$config->host->BASE_ABS_URL = '';
+	$config->host->log_file = '/tmp/log';
 	$config->host->CMD_PDFLATEX = '';
 	$config->host->mode = '';
 	$config->host->IS_PRODUCTION_HOST = false;
