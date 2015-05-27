@@ -7,31 +7,31 @@
 	<script type="text/javascript" src="app.js"></script>
   </head>
   <body>
-	<div class='col-md-6' ng-controller="MatchesController as matchesCtrl">
+	<div class="col-md-6" ng-controller="MatchesController">
 		<div class='form-group'>
 			<label for='match'>All Matches</label>
-			<select class='form-control' ng-model='matchId' name='match' id='match' ng-change='matchesCtrl.setMatch(matchId)'>
-				<option ng-repeat='match in matchesCtrl.matches' value={{match.match_id}}>
+			<select class="form-control" ng-model="matchId" name="match" ng-change="setMatch(matchId)">
+            <option ng-repeat="(key, match) in matches track by $index" value="{{match.match_id}}">
 					{{match.name}}
 				</option>
 			</select>
 		</div>
-		
-		<div class='form-group'>
-			<label for='empire'>Empires in current match</label>
-			<select class='form-control' ng-model='empireId' name='empire' id='empire' ng-change='matchesCtrl.setEmpire(matchId, empireId);'>
-				<option ng-repeat='empire in matchesCtrl.empires' value='{{empire.empire_id}}'>
+
+		<div class="form-group">
+			<label for="empire">Empires in current match</label>
+			<select class="form-control" ng-model="empireId" name="empire" id="empire" ng-change="setEmpire(matchId, empireId);">
+				<option ng-repeat="empire in empires track by $index" value="{{empire.empire_id}}">
 					{{empire.name}}
 				</option>
 			</select>
 		</div>
-		<!--{{matchesCtrl.territories}}-->
+		<!--{{territories}}-->
 		<ul class="list-unstyled">
-			<li ng-repeat='boardSquare in matchesCtrl.territories | filter : {unit: "!none"}'>
+			<li ng-repeat="boardSquare in territories | filter : {unit: '!none'}">
 				<form>
 					<h3>{{boardSquare.territory.name}} | {{boardSquare.unit}}</h3>
-					<div class='form-group'>
-						<label for='action'>Action:</label>
+					<div class="form-group">
+						<label for="action">Action:</label>
 						<select class='form-control' ng-model='action' name='action' id='action'>
 							<option value='hold'>Hold</option>
 							<option value='move'>Move or Attack</option>
@@ -40,58 +40,61 @@
 						</select>
 					</div>
 					<div ng-show='action=="move"'>
-						<div class='form-group'>
-							<label for='move-destination'>Move to:</label>
-							<select ng-model='destination' class='form-control' name='destination' id='move-destination'>
-								<option ng-repeat='territory in boardSquare.neighbours' value='{{territory.territory_id}}'>
+						<div class="form-group">
+							<label for="move-destination">Move to:</label>
+							<select ng-model="destination" class="form-control" name="destination" id="move-destination">
+								<option ng-repeat="territory in boardSquare.neighbours" value="{{territory.territory_id}}">
 									{{territory.name}}
 								</option>
 							</select>
 						</div>
 					</div>
-					<div ng-show='action=="support"'>
-						<div class='form-group'>
-							<label for='support-territory'>Support troops in:</label>
-							<select ng-model='source' class='form-control' name='territory' id='support-territory'>
-								<option ng-repeat='territory in boardSquare.neighbours' value='{{territory.territory_id}}'>
+					<div ng-show="action=='support'">
+						<div class="form-group">
+							<label for="support-territory">Support troops in:</label>
+							<select ng-model="source" class="form-control" name="territory" id="support-territory">
+								<option ng-repeat="territory in boardSquare.neighbours" value="{{territory.territory_id}}">
 									{{territory.name}}
 								</option>
 							</select>
 						</div>
 						<div>
-							<label for='support-destination'>Support them to:</label>
-							<select ng-model='destination' class='form-control' name='destination' id='support-destination'>
-								<option ng-repeat='territory in boardSquare.neighbours' value='{{territory.territory_id}}'>
+							<label for="support-destination">Support them to:</label>
+							<select ng-model="destination" class="form-control" name="destination" id="support-destination">
+								<option ng-repeat="territory in boardSquare.neighbours" value="{{territory.territory_id}}">
 									{{territory.name}}
 								</option>
 							</select>
 						</div>
 					</div>
-					<div ng-show='action=="convoy"'>
-						<div class='form-group'>
-							<label for='convoy-source'>Convoy from</label>
-							<select ng-model='source' class='form-control' name='source' id='convoy-source'>
-								<option ng-repeat='territory in boardSquare.neighbours' value='{{territory.territory_id}}'>
+					<div ng-show="action=='convoy'">
+						<div class="form-group">
+							<label for="convoy-source">Convoy from</label>
+							<select ng-model="source" class="form-control" name="source" id="convoy-source">
+								<option ng-repeat="territory in boardSquare.neighbours" value="{{territory.territory_id}}">
 									{{territory.name}}
 								</option>
 							</select>
 						</div>
-						<div class='form-group'>
-							<label for='support-destination'>Convoy to</label>
-							<select ng-model='destination' class='form-control' name='destination' id='support-destination'>
-								<option ng-repeat='territory in boardSquare.neighbours' value='{{territory.territory_id}}'>
+						<div class="form-group">
+							<label for="support-destination">Convoy to</label>
+							<select ng-model="destination" class="form-control" name="destination" id="support-destination">
+								<option ng-repeat="territory in boardSquare.neighbours" value="{{territory.territory_id}}">
 									{{territory.name}}
 								</option>
 							</select>
 						</div>
 					</div>
-					<blockquote ng-model='command' id='command-text-{{$index}}'>
+					<blockquote ng-model="command" id="command-text-{{$index}}">
 						{{action}} {{boardSquare.territory.territory_id}} {{destination}} {{source}}
 					</blockquote>
 				</form>
 			</li>
 		</ul>
-		<input class="btn btn-primary" type="submit" ng-click="matchesCtrl.sendOrders(matchId, empireId, 'move 2 1')">
+		<input class="btn btn-primary" type="submit" ng-click="sendOrders(matchId, empireId, 'move 2 1')">
 	</div>
   </body>
 </html>
+
+<!-- vim: ts=3 sts=0 sw=3 expandtab :
+-->
