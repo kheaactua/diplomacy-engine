@@ -1,7 +1,7 @@
 (function(){
 	var app = angular.module('diplomacy', []);
 
-	var server = 'http://diplomacy2.asilika.com:9494';
+	var server = 'http://diplomacy3.asilika.com';
 
 	app.controller('GamesController', ['$http', function($http){
 
