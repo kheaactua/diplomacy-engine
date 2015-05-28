@@ -1,4 +1,3 @@
-var server = 'http://diplomacy3.asilika.com';
 
 sendForms = function(){
 	$('#last').empty();
