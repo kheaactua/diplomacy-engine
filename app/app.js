@@ -31,7 +31,7 @@
 		}
 
 		$scope.setEmpire = function(matchId, empireId){
-			this.selectedEmpire=$scope.empires[empireId];
+			$scope.selectedEmpire=$scope.empires[empireId];
 
 			//Get territories for this match
 			$http.get( server + '/api/rest/matches/'+matchId+'/empires/'+empireId+'/territories?include_neighbours=1').success(function(response){
