@@ -1,7 +1,7 @@
 (function(){
 	var app = angular.module('diplomacy', []);
 
-	var server = 'http://diplomacy2.asilika.com:9494';
+	var server = 'http://diplomacy3.asilika.com';
 
 	app.controller('GamesController', ['$http', function($http){
 
@@ -16,11 +16,6 @@
 	app.controller('MatchesController', ['$http', '$scope', '$window', function($http, $scope, $window){
 
 		$scope.action = 'hold';
-
-		$scope.matches = "Hello, these are the matches";
-
-		// Don't think you should do this
-		var matchesCtrl = this;
 
 		$http.get( server + '/api/rest/matches').success(function(response){
 			$scope.matches = response.data.data;
@@ -44,7 +39,9 @@
 			});
 		}
 
-		$scope.sendOrders = function(matchId, empireId, ordersText){
+		/*
+		$scope.sendOrders = function(matchId, empireId, order, territory, destination, source){
+			var ordersText = order + " " + territory + " " + destination + " " + source;
 			var req = server + '/api/rest/matches/'+matchId+'/empires/'+empireId+'/orders?order_str='+escape(ordersText);
 			console.debug(req);
 
@@ -52,6 +49,7 @@
 				console.debug(response);
 			});
 		}
+		*/
 	}]);
 
 	app.directive("neighbourTerritories", function(){
