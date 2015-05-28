@@ -59,6 +59,19 @@
 			});
 		}
 
+
+		/**
+		 * Here you can do what you like with orders.  You can send over
+		 * the current territory to help build the order (pass boardSquare to
+		 * these methods), you can build a string as I lazyly did here, you
+		 * can build a data structure for each other.. Total flexibility.
+		 * My code below is simply 'proof of concept'
+		 *
+		 * I'd suggest creating an index or something for these orders
+		 * such that you may create a delete button in the view of the orders,
+		 * or so that you can overwrite them by issuing a new one from the
+		 * same territory.
+		 */
 		$scope.orders = [];
 		$scope.writeMoveOrder = function(territoryId) {
 			$scope.orders.push('MOVE "' + territoryController.get(parseInt(territoryId)).name + '"');
