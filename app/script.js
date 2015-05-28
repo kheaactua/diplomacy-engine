@@ -9,8 +9,9 @@ sendOrders = function(matchId, empireId, orderText){
 	var req = server + '/api/rest/matches/'+matchId+'/empires/'+empireId+'/orders?order_str='+escape(jQuery.trim(orderText));
 	console.debug(req);
 	jQuery.get(req, function( response ) {
-	  console.debug( response );
-	  $('#last').append(response.data.msg + '<br>');
+		console.debug( response );
+		$('#last').append(response.data.msg + '<br>');
 	});
 }
 
+// vim: noet sts=0 sw=4 ts=4 :
