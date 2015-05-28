@@ -1,7 +1,7 @@
 (function(){
 	var app = angular.module('diplomacy', []);
 
-	var server = 'http://diplomacy2.asilika.com:9494';
+	var server = 'http://diplomacy3.asilika.com';
 
 	app.controller('GamesController', ['$http', function($http){
 
@@ -16,11 +16,6 @@
 	app.controller('MatchesController', ['$http', '$scope', '$window', function($http, $scope, $window){
 
 		$scope.action = 'hold';
-
-		$scope.matches = "Hello, these are the matches";
-
-		// Don't think you should do this
-		var matchesCtrl = this;
 
 		$http.get( server + '/api/rest/matches').success(function(response){
 			$scope.matches = response.data.data;
@@ -62,7 +57,4 @@
 
 	});
 
-})();
-
-// vim: noet sts=0 sw=4 ts=4 :
 })();
