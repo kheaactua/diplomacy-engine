@@ -1,17 +1,17 @@
 <!doctype html>
 <html ng-app="diplomacy">
-  <head>
-    <script type="text/javascript" src="bower_components/jquery/dist/jquery.js"></script>
-    <script type="text/javascript" src="bower_components/angularjs\angular.js"></script>
+<head>
+	<script type="text/javascript" src="bower_components/jquery/dist/jquery.js"></script>
+	<script type="text/javascript" src="bower_components/angularjs\angular.js"></script>
 	<link rel="stylesheet" type="text/css" href="bower_components/bootstrap/dist/css/bootstrap.css" />
 	<script type="text/javascript" src="app.js"></script>
 	<script type="text/javascript" src="script.js"></script>
-  </head>
-  <body>
+</head>
+<body>
 	<div class="col-md-6">
 		<div ng-controller="MatchesController">
-			<div class='form-group'>
-				<label for='match'>All Matches</label>
+			<div class="form-group">
+				<label for="match">All Matches</label>
 				<select class="form-control" ng-model="matchId" name="match" id="match" ng-change="setMatch(matchId)">
 				<option ng-repeat="(key, match) in matches track by $index" value="{{match.match_id}}">
 						{{match.name}}
@@ -34,14 +34,14 @@
 						<h3>{{boardSquare.territory.name}} | {{boardSquare.unit}}</h3>
 						<div class="form-group">
 							<label for="action">Action:</label>
-							<select class='form-control' ng-model='action' name='action' id='action'>
-								<option value='hold'>Hold</option>
-								<option value='move'>Move or Attack</option>
-								<option value='support'>Support</option>
-								<option ng-show='boardSquare.unit === "fleet"' value='convoy'>Convoy</option>
+							<select class="form-control" ng-model="action" name="action" id="action">
+								<option value="hold">Hold</option>
+								<option value="move">Move or Attack</option>
+								<option value="support">Support</option>
+								<option ng-show="boardSquare.unit === 'fleet'" value="convoy">Convoy</option>
 							</select>
 						</div>
-						<div ng-show='action=="move"'>
+						<div ng-show="action=='move'">
 							<div class="form-group">
 								<label for="move-destination">Move to:</label>
 								<select ng-model="destination" class="form-control" name="destination" id="move-destination">
@@ -87,7 +87,7 @@
 								</select>
 							</div>
 						</div>
-						<div class='invisible'>
+						<div class="invisible">
 							<span id="command-text-{{$index}}">{{action}} {{boardSquare.territory.territory_id}} {{destination}} {{source}}</span>
 						</div>
 					</form>
@@ -95,10 +95,10 @@
 			</ul>
 		</div>
 		<input class="btn btn-primary" type="submit" onclick="sendForms()">
-		<blockquote id='last'>
+		<blockquote id="last">
 		</blockquote>
 	</div>
-  </body>
+</body>
 </html>
 
 <!-- vim: ts=3 sts=0 sw=3 expandtab :
