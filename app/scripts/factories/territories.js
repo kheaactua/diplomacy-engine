@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('diplomacy')
-.factory('TerritoryController', ['$q', 'Territory', function(d$q, Territory) {
+.factory('TerritoryController', ['$q', 'Territory', 'config', function(d$q, Territory, config) {
 
 
 	function TerritoryController() {

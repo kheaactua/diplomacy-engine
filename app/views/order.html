@@ -1,0 +1,11 @@
+<div>
+	<div class="col-xs-8 col-sm-10">
+		<span ng-show="order.valid" class="glyphicon glyphicon-ok"></span>
+		<span ng-show="!order.valid" class="glyphicon glyphicon-remove-circle"></span>
+		<span class="order-command">{{order.command}}</span>
+	</div>
+	<div class="col-xs-4 col-sm-2 text-right">
+		<button class="btn-warning" ng-click="order.validate($parent.validateCallback)">Validate</button>
+		<button class="btn-danger" ng-click="$parent.deleteOrder(order.orderId)"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+	</div>
+</div>

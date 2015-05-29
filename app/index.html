@@ -6,6 +6,8 @@
 	<link rel="stylesheet" type="text/css" href="bower_components/bootstrap/dist/css/bootstrap.css" />
 	<script type="text/javascript" src="app.js"></script>
 	<script type="text/javascript" src="scripts/factories/territories.js"></script>
+	<script type="text/javascript" src="scripts/factories/orders.js"></script>
+	<script type="text/javascript" src="scripts/directives/order.js"></script>
 	<script type="text/javascript" src="script.js"></script>
 </head>
 <body ng-controller="MatchesController">
@@ -45,7 +47,7 @@
 						<div ng-show="action=='move'">
 							<div class="form-group">
 								<label for="move-destination">Move to:</label>
-								<select ng-model="destination[tIdx]" class="form-control" ng-change="writeMoveOrder(destination[tIdx])">
+								<select ng-model="destination[tIdx]" class="form-control" ng-change="writeMoveOrder(boardSquare, destination[tIdx])">
 									<option ng-repeat="neighbour in boardSquare.neighbours track by $index" value="{{neighbour.territoryId}}">
 										{{neighbour.name}}
 									</option>
@@ -55,7 +57,7 @@
 						<div ng-show="action=='support'">
 							<div class="form-group">
 								<label for="support-territory">Support troops in:</label>
-								<select ng-model="source[tIdx]" class="form-control">
+								<select ng-model="supportSource[tIdx]" class="form-control">
 									<option ng-repeat="neighbour in boardSquare.neighbours track by $index" value="{{neighbour.territoryId}}">
 										{{neighbour.name}}
 									</option>
@@ -63,18 +65,18 @@
 							</div>
 							<div>
 								<label for="support-destination">Support them to:</label>
-								<select ng-model="destination" class="form-control" name="destination">
+								<select ng-model="supportDestination[tIdx]" class="form-control" name="destination">
 									<option ng-repeat="neighbour in boardSquare.neighbours" value="{{neighbour.territoryId}}">
 										{{neighbour.name}}
 									</option>
 								</select>
 							</div>
-							<button ng-click="writeSupportOrder(source[tIdx], destination[tIdx])">Issue</button>
+							<button ng-click="writeSupportOrder(boardSquare, supportSource[tIdx], supportDestination[tIdx])">Issue</button>
 						</div>
 						<div ng-show="action=='convoy'">
 							<div class="form-group">
 								<label for="convoy-source">Convoy from</label>
-								<select ng-model="source[tIdx]" class="form-control">
+								<select ng-model="convoySource[tIdx]" class="form-control">
 									<option ng-repeat="neighbour in boardSquare.neighbours" value="{{neighbour.territoryId}}">
 										{{neighbour.name}}
 									</option>
@@ -82,13 +84,13 @@
 							</div>
 							<div class="form-group">
 								<label for="support-destination">Convoy to</label>
-								<select ng-model="destination[tIdx]" class="form-control">
+								<select ng-model="convoyDestination[tIdx]" class="form-control">
 									<option ng-repeat="neighbour in boardSquare.neighbours" value="{{neighbour.territoryId}}">
 										{{neighbour.name}}
 									</option>
 								</select>
 							</div>
-							<button ng-click="writeConvoyOrder(source[tIdx], destination[tIdx])">Issue</button>
+							<button ng-click="writeConvoyOrder(boardSquare, convoySource[tIdx], convoyDestination[tIdx])">Issue</button>
 						</div>
 						<div class="invisible">
 							<span id="command-text-{{$index}}">{{action}} {{boardSquare.territory.territoryId}} {{destination}} {{source}}</span>
@@ -98,11 +100,17 @@
 			</ul>
 		</div>
 		<input class="btn btn-primary" type="submit" ng-click="sendAllOrders()">
-		<blockquote id="last">
-			<ul>
-				<li ng-repeat="o in orders">{{o}}</li>
-			</ul>
-		</blockquote>
+		<div class="order-queue panel panel-warning" ng-show="orders.length">
+			<div class="panel-heading">Order Queue</div>
+			<div class="panel-body">
+				<order
+					ng-repeat="(idx, o) in orders track by $index"
+					order="o"
+					validate-callback="validateOrder"
+					delete-order="deleteOrder">
+				</order>
+			</div>
+		</div>
 	</div>
 </body>
 </html>
