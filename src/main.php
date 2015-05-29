@@ -109,7 +109,7 @@ foreach ($neighbours as $n) {
 
 print "\n" . Unit::printUnitTable($match->getCurrentTurn());
 
-$case = 4;
+$case = 3;
 switch ($case) {
 	case 1;
 		// Test move conflict
@@ -137,7 +137,7 @@ switch ($case) {
 			print "[{$config->ansi->red}Error{$config->ansi->clear}]: Some how the turn state is empty again: ". $e->getMessage() . "\n";
 			exit;
 		}
-		$turn->addOrder(Order::interpretText('SUPPORT "A" "E" "B"', $match, $green));
+		$turn->addOrder(Order::interpretText('SUPPORT "E" "A" "B"', $match, $green));
 		$turn->save();
 		break;
 	case 4:
