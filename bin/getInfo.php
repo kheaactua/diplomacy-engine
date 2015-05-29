@@ -18,7 +18,7 @@ use DiplomacyOrm\State;
 use DiplomacyOrm\StateQuery;
 use Propel\Runtime\ActiveQuery\Criteria;
 
-$opts=getopt('Gg:Mm:Tt:Sh', array('help'));
+$opts=getopt('Gg:Mm:Tt:Ss:e:h', array('help'));
 if (array_key_exists('h', $opts) || array_key_exists('help', $opts)) {
 	print <<<TEND
 
@@ -66,7 +66,7 @@ if (array_key_exists('G', $opts)) {
 		$str .= "Available games:\n";
 		$str .= str_repeat('-', 25) . "\n";
 		foreach ($games as $game) {
-			print $game;
+			$str .= $game;
 		}
 	} else {
 		$str .= "The system has no games\n";
@@ -82,7 +82,7 @@ if (array_key_exists('M', $opts)) {
 		$str .= "Available Matches:\n";
 		$str .= str_repeat('-', 25) . "\n";
 		foreach ($objs as $o) {
-			$str .= $o->getName();
+			$str .= sprintf("%0.3d: %s\n", $o->getPrimaryKey(), $o->getName());
 		}
 	} else {
 		$str .= "The system has no matches\n";
@@ -107,7 +107,7 @@ if (array_key_exists('e', $opts) &&
 	}
 
 	$empire = EmpireQuery::create()
-			->filterByPk($opts['e'])
+			->filterByPrimaryKey($opts['e'])
 		->_or()
 			->filterByName($opts['e'] . '%', Criteria::LIKE)
 		->findOne();
@@ -115,11 +115,13 @@ if (array_key_exists('e', $opts) &&
 
 	$units = UnitQuery::create()
 		->filterByTurn($turn)
-		->filterByEmpire($empire)
+		->useStateQuery()
+			->filterByOccupier($empire) // TODO This will skip all retreated units
+		->endUse()
 		->find();
 	$str = '';
 	if (count($units)) {
-		$str .= "$empire unit's in $turn:\n";
+		$str .= "$empire units in $turn:\n";
 		$str .= str_pad('Empire', 12) .	str_pad('Unit', 7) .	 str_pad('Prev Territory', 30) . str_pad('Territory', 30) ."\n";
 		$str .= str_pad('', 11, '-') .' '. str_pad('', 6, '-') .' '. str_pad('', 29, '-') . ' '	. str_pad('', 29, '-')	."\n";
 		foreach ($units as $unit) {
@@ -141,7 +143,7 @@ if (array_key_exists('e', $opts) &&
 			}
 			$str .= str_pad($lastTerritory, 31) . str_pad($currentTerritory, 30) . "\n";
 		}
-		$str .= $str;
+		$str .= "\n";
 	} else {
 		$str .= "$empire has no units in $turn\n";
 	}
@@ -155,7 +157,8 @@ if (array_key_exists('m', $opts) && array_key_exists('T', $opts)) {
 		if (!is_object($match)) die("Invalid match id");
 		$turn = $match->getCurrentTurn();
 	}
-	$turns = $match->getTurns();
+	$turns = $match->getTurnsRelatedByMatchId();
+	$str = '';
 	if (count($turns)) {
 		foreach ($turns as $turn) {
 			$str .= "$turn\n";
@@ -173,6 +176,7 @@ if (array_key_exists('m', $opts) && array_key_exists('S', $opts)) {
 		$match = MatchQuery::create()->findPk($opts['m']);
 		if (!is_object($match)) die("Invalid match id");
 	}
+	$str = '';
 	$states = StateQuery::create()
 		->useTurnQuery()
 			->filterByMatch($match)
@@ -180,7 +184,7 @@ if (array_key_exists('m', $opts) && array_key_exists('S', $opts)) {
 		->filterByTurn($match->getCurrentTurn())
 		->find();
 	if (count($states)) {
-		foreach ($state as $o) {
+		foreach ($states as $o) {
 			$str .= $o . "\n";
 		}
 	} else {
@@ -197,17 +201,18 @@ if (array_key_exists('m', $opts) && array_key_exists('s', $opts)) {
 	}
 	if (array_key_exists('s', $opts)) {
 		$territories = TerritoryTemplateQuery::create()
-				->findPk($opts['s'])
+				->filterByPrimaryKey($opts['s'])
 			->_or()
 				->filterByName($opts['s'], Criteria::LIKE)
 			->find();
 	}
 	$states = StateQuery::create()
-		->filterByTerritor($territories, Criteria::IN)
+		->filterByTerritory($territories, Criteria::IN)
 		->filterByTurn($match->getCurrentTurn())
 		->find();
+	$str = '';
 	if (count($states)) {
-		foreach ($state as $o) {
+		foreach ($states as $o) {
 			$str .= $o . "\n";
 		}
 	} else {
@@ -216,4 +221,17 @@ if (array_key_exists('m', $opts) && array_key_exists('s', $opts)) {
 	print $str;
 	exit(0);
 }
+
+
+if (array_key_exists('m', $opts)) {
+	if (array_key_exists('m', $opts)) {
+		$match = MatchQuery::create()->findPk($opts['m']);
+		if (!is_object($match)) die("Invalid match id");
+	}
+	print $match;
+	exit(0);
+}
+
+
+
 // vim: ts=4 sts=0 sw=4 noexpandtab :
