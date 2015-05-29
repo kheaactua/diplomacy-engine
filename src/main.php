@@ -47,7 +47,7 @@ use Propel\Runtime\Propel;
 $con = Propel::getWriteConnection(DiplomacyOrm\Map\GameTableMap::DATABASE_NAME);
 //$sql = "DELETE FROM game WHERE name<>'test'";
 $queries = array('DELETE FROM game');
-$tables = array('game_match', 'match_state', 'turn', 'empire_order', 'empire', 'unit', 'territory_template');
+$tables = array('game_match', 'match_state', 'turn', 'empire_order', 'empire', 'territory_template');
 foreach ($tables as $t)
 	$queries[] = "ALTER TABLE $t AUTO_INCREMENT = 1";
 foreach ($queries as $q) {

@@ -80,7 +80,6 @@ $state = StateQuery::create()
 if (!($state instanceof State)) die("Cannot match {$opts['s']} to a state.\n");
 // State should now be set
 
-$config->system->db->useDebug(true);
 if (!array_key_exists('e', $opts)) die("Must specify empire");
 $empire = EmpireQuery::getByNameOrId($opts['e']);
 if (!is_object($empire)) die("Could not match {$opts['e']} to an empire");
@@ -89,15 +88,16 @@ if (!is_object($empire)) die("Could not match {$opts['e']} to an empire");
 if (!array_key_exists('u', $opts)) die("Must specify unit type");
 $unit_type = Unit::convert($opts['u']);
 if ($unit_type === false) die("Invalid unit type {$opts['u']}");
-// unit_Type should now be set
+$unit = new Unit($unit_type);
+// unit should now be set
 
-$question = sprintf("Currently %s is occupied by %s, continuing will replace its occupier with a \"%s\" from %s.\nContinue? [Y/n] ", $state->getTerritory()->getName(), $state->getOccupier(), $unit_type, $empire);
+$question = sprintf("Currently %s is occupied by %s, continuing will replace its occupier with a \"%s\" from %s.\nContinue? [Y/n] ", $state->getTerritory()->getName(), $state->getOccupier(), $unit, $empire);
 $resp = readline($question);
 $resp = trim($resp);
 if (strtolower($resp) == 'y' || $resp == '') {
 	// State table:
-	$state->setOccupier($empire);
-	//$state->setUnitType($unit->enum());
+	$state->setOccupation($empire, $unit);
+	$state->save();
 	printf("%s is now occupied by $empire\n", $state->getTerritory()->getName());
 }
 
