@@ -12,8 +12,6 @@ use DiplomacyOrm\Empire;
 use DiplomacyOrm\EmpireQuery;
 use DiplomacyOrm\TerritoryTemplate;
 use DiplomacyOrm\TerritoryTemplateQuery;
-use DiplomacyOrm\Unit;
-use DiplomacyOrm\UnitQuery;
 use DiplomacyOrm\State;
 use DiplomacyOrm\StateQuery;
 use Propel\Runtime\ActiveQuery\Criteria;
@@ -113,28 +111,30 @@ if (array_key_exists('e', $opts) &&
 		->findOne();
 	if (!is_object($empire)) die("Invalid empire");
 
-	$units = UnitQuery::create()
+	$states = StateQuery::create()
 		->filterByTurn($turn)
-		->useStateQuery()
-			->filterByOccupier($empire) // TODO This will skip all retreated units
-		->endUse()
+		->filterByOccupier($empire)
 		->find();
-	$str = '';
-	if (count($units)) {
-		$str .= "$empire units in $turn:\n";
-		$str .= str_pad('Empire', 12) .	str_pad('Unit', 7) .	 str_pad('Prev Territory', 30) . str_pad('Territory', 30) ."\n";
-		$str .= str_pad('', 11, '-') .' '. str_pad('', 6, '-') .' '. str_pad('', 29, '-') . ' '	. str_pad('', 29, '-')	."\n";
-		foreach ($units as $unit) {
-			$str .= str_pad($unit->getState()->getOccupier(), 12);
-			$str .= str_pad($unit->getUnitType(), 6);
 
-			if (is_object($unit->getState())) {
-				$currentTerritory = $unit->getState()->getTerritory()->__toString();
+	$str = '';
+	if (count($state)) {
+		$str .= "$empire units in $turn:\n";
+		$str .= str_pad('Empire', 12) .	str_pad('Unit', 7) .           str_pad('Territory', 30) ."\n";
+		$str .= str_pad('', 11, '-') .' '. str_pad('', 6, '-') . ' ' . str_pad('', 29, '-')	."\n";
+		// $str .= str_pad('Empire', 12) .	str_pad('Unit', 7) .	 str_pad('Prev Territory', 30) . str_pad('Territory', 30) ."\n";
+		// $str .= str_pad('', 11, '-') .' '. str_pad('', 6, '-') .' '. str_pad('', 29, '-') . ' '	. str_pad('', 29, '-')	."\n";
+		foreach ($states as $state) {
+			$str .= str_pad($state->getOccupier(), 12);
+			$str .= str_pad($state->getUnit()->getUnitType(), 6);
+
+			if (is_object($steate)) {
+				$currentTerritory = $state()->getTerritory()->__toString();
 			} else {
 				// Retreated..
 				$currentTerritory = '<stateless>';
 			}
 
+			/*
 			if (is_object($unit->getLastState())) {
 				$lastTerritory = $unit->getLastState()->getTerritory()->__toString();
 			} else {
@@ -142,6 +142,9 @@ if (array_key_exists('e', $opts) &&
 				$lastTerritory = '';
 			}
 			$str .= str_pad($lastTerritory, 31) . str_pad($currentTerritory, 30) . "\n";
+			*/
+			$str .= str_pad($currentTerritory, 30) . "\n";
+
 		}
 		$str .= "\n";
 	} else {
@@ -239,35 +242,37 @@ if (array_key_exists('t', $opts)) {
 		if (!is_object($turn)) die("Invalid turn id");
 	}
 
-	$units = UnitQuery::create()
+	$states = StateQuery::create()
 		->filterByTurn($turn)
-		->useStateQuery()
-			->orderByOccupierId()
-		->endUse()
+		->orderByOccupierId()
 		->find();
 	$str = '';
-	if (count($units)) {
+	if (count($states)) {
 		$str .= "Units in $turn:\n";
-		$str .= str_pad('Empire', 12) .	str_pad('Unit', 7) .	 str_pad('Prev Territory', 30) . str_pad('Territory', 30) ."\n";
-		$str .= str_pad('', 11, '-') .' '. str_pad('', 6, '-') .' '. str_pad('', 29, '-') . ' '	. str_pad('', 29, '-')	."\n";
-		foreach ($units as $unit) {
-			$str .= str_pad($unit->getState()->getOccupier(), 12);
-			$str .= str_pad($unit->getUnitType(), 8);
+		$str .= str_pad('Empire', 12) .	str_pad('Unit', 7) .	 str_pad('Territory', 30) ."\n";
+		$str .= str_pad('', 11, '-') .' '. str_pad('', 6, '-') . ' '	. str_pad('', 29, '-')	."\n";
+		// $str .= str_pad('Empire', 12) .	str_pad('Unit', 7) .	 str_pad('Prev Territory', 30) . str_pad('Territory', 30) ."\n";
+		// $str .= str_pad('', 11, '-') .' '. str_pad('', 6, '-') .' '. str_pad('', 29, '-') . ' '	. str_pad('', 29, '-')	."\n";
+		foreach ($states as $state) {
+			$str .= str_pad($state->getOccupier(), 12);
+			$type = $state->getUnit() instanceof Unit ? $state->getUnit()->getUnitType() : 'none';
+			$str .= str_pad($type, 8);
 
-			if (is_object($unit->getState())) {
-				$currentTerritory = $unit->getState()->getTerritory()->__toString();
+			if (is_object($state)) {
+				$currentTerritory = $state->getTerritory()->__toString();
 			} else {
 				// Retreated..
 				$currentTerritory = '<stateless>';
 			}
 
-			if (is_object($unit->getLastState())) {
-				$lastTerritory = $unit->getLastState()->getTerritory()->__toString();
-			} else {
-				// Retreated..
-				$lastTerritory = '';
-			}
-			$str .= str_pad($lastTerritory, 29) . str_pad($currentTerritory, 30) . "\n";
+			// if (is_object($unit->getLastState())) {
+			// 	$lastTerritory = $unit->getLastState()->getTerritory()->__toString();
+			// } else {
+			// 	// Retreated..
+			// 	$lastTerritory = '';
+			// }
+			// $str .= str_pad($lastTerritory, 29) . str_pad($currentTerritory, 30) . "\n";
+			$str .= str_pad($currentTerritory, 30) . "\n";
 		}
 		$str .= "\n";
 	} else {
