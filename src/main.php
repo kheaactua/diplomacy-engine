@@ -20,7 +20,6 @@ use DiplomacyOrm\Game;
 use DiplomacyOrm\GameQuery;
 use DiplomacyOrm\Order;
 use DiplomacyOrm\OrderQuery;
-use DiplomacyOrm\TurnResult;
 use DiplomacyOrm\UnitSupplyResolver;
 use DiplomacyOrm\RetreatResolver;
 
@@ -109,7 +108,7 @@ foreach ($neighbours as $n) {
 
 print "\n" . Unit::printUnitTable($match->getCurrentTurn());
 
-$case = 2;
+$case = 3;
 switch ($case) {
 	case 1;
 		// Test move conflict
@@ -155,6 +154,8 @@ switch ($case) {
 		break;
 	case 6:
 		// No orders
+		$result = $match->getCurrentTurn()->processOrders(); print $match ."\n";
+		$result = $match->getCurrentTurn()->processOrders();
 		$result = $match->getCurrentTurn()->processOrders();
 		$result = $match->getCurrentTurn()->processOrders();
 		break;
@@ -163,14 +164,13 @@ switch ($case) {
 
 $match->getCurrentTurn()->printOrders();
 $result = $match->getCurrentTurn()->processOrders();
-print "\n" . Unit::printUnitTable($match->getCurrentTurn());
-$match->getCurrentTurn()->printOrders();
+//print "\n" . Unit::printUnitTable($match->getCurrentTurn());
+//$match->getCurrentTurn()->printOrders();
 //print_r($result->__toArray());
 //print json_encode($result->__toArray());
 
-exit;
-if ($result->getNextSeason() == 'spring_retreats' || $result->getNextSeason() == 'fall_retreats') {
-	print $result;
+if ($result->retreatsRequired()) {
+	//print $result;
 
 	$retreat = Retreat::createNS($blue, $t_b, $t_c);
 	print "Adding retreat order: $retreat\n";
