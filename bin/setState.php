@@ -18,7 +18,7 @@ use DiplomacyOrm\State;
 use DiplomacyOrm\StateQuery;
 use Propel\Runtime\ActiveQuery\Criteria;
 
-$opts=getopt('Mm:Tt:Ss:e:u:h', array('help'));
+$opts=getopt('Mm:Tt:Ss:e:u:hf', array('help'));
 if (array_key_exists('h', $opts) || array_key_exists('help', $opts)) {
 	print <<<TEND
 
@@ -39,6 +39,9 @@ Usage:
 
 	-u unit_type
 		army, fleet, vacant, retreated, none
+
+	-f
+		Do not prompt the user to confirm
 
 	-h --help  Print this message
 
@@ -91,9 +94,20 @@ if ($unit_type === false) die("Invalid unit type {$opts['u']}");
 $unit = new Unit($unit_type);
 // unit should now be set
 
-$question = sprintf("Currently %s is occupied by %s, continuing will replace its occupier with a \"%s\" from %s.\nContinue? [Y/n] ", $state->getTerritory()->getName(), $state->getOccupier(), $unit, $empire);
-$resp = readline($question);
-$resp = trim($resp);
+if (array_key_exists('f', $opts)) {
+	$resp = 'y';
+} else {
+	$question = "[{$config->ansi->red}$turn{$config->ansi->clear}] Currently "
+	   .$config->ansi->yellow. $state->getTerritory()->getName() . $config->ansi->clear
+	   ." is occupied by "
+	   .$config->ansi->red. $state->getOccupier() .$config->ansi->clear
+	   .", continuing will replace its occupier with a "
+	   ."\"{$config->ansi->green}". strtolower($unit) . "{$config->ansi->clear}\""
+	   ." from {$config->ansi->red}$empire{$config->ansi->clear}.\n";
+	print $question;
+	$resp = readline("Continue? [Y/n] ");
+	$resp = trim($resp);
+}
 if (strtolower($resp) == 'y' || $resp == '') {
 	// State table:
 	$state->setOccupation($empire, $unit);
