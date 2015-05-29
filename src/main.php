@@ -109,21 +109,21 @@ foreach ($neighbours as $n) {
 
 print "\n" . Unit::printUnitTable($match->getCurrentTurn());
 
-$case = 3;
+$case = 2;
 switch ($case) {
 	case 1;
 		// Test move conflict
-		$turn->addOrder(Move::createNS($red,    new Unit('Army'),  $t_a,  $t_b));
-		$turn->addOrder(Move::createNS($red,    new Unit('Army'),  $t_a,  $t_c));
-		$turn->addOrder(Move::createNS($blue,   new Unit('Army'),  $t_a,  $t_b));
-		$turn->addOrder(Move::createNS($green,  new Unit('Army'),  $t_e,  $t_d));
+		$turn->addOrder(Move::createNS($red,    $t_a,  $t_b));
+		$turn->addOrder(Move::createNS($red,    $t_a,  $t_c));
+		$turn->addOrder(Move::createNS($blue,   $t_a,  $t_b));
+		$turn->addOrder(Move::createNS($green,  $t_e,  $t_d));
 		$turn->save();
 		break;
 	case 2;
 		// Test support
-		$turn->addOrder(Move::createNS($red,       new Unit('Army'),  $t_a,  $t_b));
-		$turn->addOrder(Move::createNS($blue,      new Unit('Army'),  $t_a,  $t_b));
-		$turn->addOrder(Support::createNS($green,  $red,              $t_e,  $t_b));
+		$turn->addOrder(Move::createNS($red,       $t_a,  $t_b));
+		$turn->addOrder(Move::createNS($blue,      $t_b,  $t_c));
+		$turn->addOrder(Support::createNS($green,  $t_a,  $t_e, $t_b));
 		$turn->save();
 		break;
 	case 3:
