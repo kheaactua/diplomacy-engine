@@ -129,7 +129,7 @@ switch ($case) {
 	case 3:
 //$config->system->db->useDebug(true);
 		try {
-			$turn->addOrder(Order::interpretText("MOVE A-B", $match, $red));
+			$turn->addOrder(Order::interpretText('MOVE "A" "B"', $match, $red));
 		} catch (\DiplomacyOrm\InvalidOrderException $e) {
 			print "[{$config->ansi->red}Error{$config->ansi->clear}]: Red cannot MOVE A-B: ". $e->getMessage() . "\n";
 			exit;
@@ -137,21 +137,21 @@ switch ($case) {
 			print "[{$config->ansi->red}Error{$config->ansi->clear}]: Some how the turn state is empty again: ". $e->getMessage() . "\n";
 			exit;
 		}
-		$turn->addOrder(Order::interpretText("SUPPORT RED E-B", $match, $green));
+		$turn->addOrder(Order::interpretText('SUPPORT "A" "E" "B"', $match, $green));
 		$turn->save();
 		break;
 	case 4:
 		// Test the case with multiple contendors stalemat. standoff.svg
-		$turn->addOrder(Order::interpretText("MOVE A-B", $match, $red));
-		$turn->addOrder(Order::interpretText("SUPPORT RED F-B", $match, $red));
-		$turn->addOrder(Order::interpretText("MOVE I-B", $match, $green));
-		$turn->addOrder(Order::interpretText("SUPPORT GREEN H-B", $match, $green));
+		$turn->addOrder(Order::interpretText('MOVE "A" "B"', $match, $red));
+		$turn->addOrder(Order::interpretText('SUPPORT "A" "F" "B"', $match, $red));
+		$turn->addOrder(Order::interpretText('MOVE "I" "B"', $match, $green));
+		$turn->addOrder(Order::interpretText('SUPPORT "E" "H" "B"', $match, $green));
 		$turn->save();
 
 		// RED and GREEN should loose in statemates, B should belong to BLUE
 		break;
 	case 5:
-		$turn->addOrder(Order::interpretText("MOVE E-C", $match, $green));
+		$turn->addOrder(Order::interpretText('MOVE "E" "C"', $match, $green));
 		break;
 	case 6:
 		// No orders
