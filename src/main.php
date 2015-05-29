@@ -9,7 +9,7 @@
 
 use DiplomacyOrm\Empire;
 use DiplomacyOrm\EmpireQuery;
-use DiplomacyEngine\Unit;
+use DiplomacyOrm\Unit;
 use DiplomacyOrm\TerritoryTemplate;
 use DiplomacyOrm\TerritoryTemplateQuery;
 use DiplomacyOrm\Map\TerritoryTemplateTableMap;
@@ -20,7 +20,9 @@ use DiplomacyOrm\Game;
 use DiplomacyOrm\GameQuery;
 use DiplomacyOrm\Order;
 use DiplomacyOrm\OrderQuery;
-use DiplomacyOrm\ResolutionResult;
+use DiplomacyOrm\TurnResult;
+use DiplomacyOrm\UnitSupplyResolver;
+use DiplomacyOrm\RetreatResolver;
 
 use DiplomacyOrm\Move;
 use DiplomacyOrm\Support;
@@ -43,9 +45,15 @@ if ($order instanceof Order) {
 // Clear the DB first
 use Propel\Runtime\Propel;
 $con = Propel::getWriteConnection(DiplomacyOrm\Map\GameTableMap::DATABASE_NAME);
-$sql = "DELETE FROM game WHERE name<>'test'";
-$stmt = $con->prepare($sql);
-$stmt->execute();
+//$sql = "DELETE FROM game WHERE name<>'test'";
+$queries = array('DELETE FROM game');
+$tables = array('match_state', 'turn', 'empire_order', 'empire', 'unit');
+foreach ($tables as $t)
+	$queries[] = "ALTER TABLE $t AUTO_INCREMENT = 1";
+foreach ($queries as $q) {
+	$stmt = $con->prepare($q);
+	$stmt->execute();
+}
 
 //$config->system->db->useDebug(true);
 
@@ -92,6 +100,7 @@ foreach ($t_names as $n) {
 	$$varname = StateQuery::create()->filterByTerritory($tt)->findOne();
 }
 
+print "\n" . Unit::printUnitTable($match->getCurrentTurn());
 
 $case = 4;
 switch ($case) {
@@ -101,12 +110,14 @@ switch ($case) {
 		$turn->addOrder(Move::createNS($red,    new Unit('Army'),  $t_a,  $t_c));
 		$turn->addOrder(Move::createNS($blue,   new Unit('Army'),  $t_a,  $t_b));
 		$turn->addOrder(Move::createNS($green,  new Unit('Army'),  $t_e,  $t_d));
+		$turn->save();
 		break;
 	case 2;
 		// Test support
 		$turn->addOrder(Move::createNS($red,       new Unit('Army'),  $t_a,  $t_b));
 		$turn->addOrder(Move::createNS($blue,      new Unit('Army'),  $t_a,  $t_b));
 		$turn->addOrder(Support::createNS($green,  $red,              $t_e,  $t_b));
+		$turn->save();
 		break;
 	case 3:
 //$config->system->db->useDebug(true);
@@ -120,6 +131,7 @@ switch ($case) {
 			exit;
 		}
 		$turn->addOrder(Order::interpretText("SUPPORT RED E-B", $match, $green));
+		$turn->save();
 		break;
 	case 4:
 		// Test the case with multiple contendors stalemat. standoff.svg
@@ -127,37 +139,43 @@ switch ($case) {
 		$turn->addOrder(Order::interpretText("SUPPORT RED F-B", $match, $red));
 		$turn->addOrder(Order::interpretText("MOVE I-B", $match, $green));
 		$turn->addOrder(Order::interpretText("SUPPORT GREEN H-B", $match, $green));
+		$turn->save();
 
 		// RED and GREEN should loose in statemates, B should belong to BLUE
 		break;
 	case 5:
 		$turn->addOrder(Order::interpretText("MOVE E-C", $match, $green));
+		break;
+	case 6:
+		// No orders
+		$result = $match->getCurrentTurn()->processOrders();
+		$result = $match->getCurrentTurn()->processOrders();
+		break;
 
 }
-$turn->save();
 
-$result = $turn->processOrders();
-$turn->printOrders();
-if ($result->getStatus() == ResolutionResult::RETREATS_REQUIRED) {
+$match->getCurrentTurn()->printOrders();
+$result = $match->getCurrentTurn()->processOrders();
+print "\n" . Unit::printUnitTable($match->getCurrentTurn());
+$match->getCurrentTurn()->printOrders();
+//print_r($result->__toArray());
+//print json_encode($result->__toArray());
+
+exit;
+if ($result->getNextSeason() == 'spring_retreats' || $result->getNextSeason() == 'fall_retreats') {
 	print $result;
 
 	$retreat = Retreat::createNS($blue, $t_b, $t_c);
 	print "Adding retreat order: $retreat\n";
-	$turn->addOrder($retreat);
+	$match->getCurrentTurn()->addOrder($retreat);
 
 	print "----------------------------------------\n";
 	print "After adding retreat order..\n";
-	$turn->printOrders();
-	$result = $turn->processOrders();
+	$match->getCurrentTurn()->printOrders();
+	$result = $match->getCurrentTurn()->processOrders();
 	print $result;
 }
 
-
-try {
-	$match->next();
-} catch (\DiplomacyOrm\TurnNotCompleteException $ex) {
-	print "Called next, received: '". $ex->getMessage() . "'\n";
-}
 
 // Show which orders have failed, etc
 
