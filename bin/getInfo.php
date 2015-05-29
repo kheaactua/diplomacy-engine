@@ -2,18 +2,18 @@
 <?php
 require_once(dirname(__FILE__) . '/../config/config.php');
 
+use DiplomacyOrm\Empire;
+use DiplomacyOrm\EmpireQuery;
 use DiplomacyOrm\Game;
 use DiplomacyOrm\GameQuery;
 use DiplomacyOrm\Match;
 use DiplomacyOrm\MatchQuery;
-use DiplomacyOrm\Turn;
-use DiplomacyOrm\TurnQuery;
-use DiplomacyOrm\Empire;
-use DiplomacyOrm\EmpireQuery;
-use DiplomacyOrm\TerritoryTemplate;
-use DiplomacyOrm\TerritoryTemplateQuery;
 use DiplomacyOrm\State;
 use DiplomacyOrm\StateQuery;
+use DiplomacyOrm\TerritoryTemplate;
+use DiplomacyOrm\TerritoryTemplateQuery;
+use DiplomacyOrm\Turn;
+use DiplomacyOrm\TurnQuery;
 use DiplomacyOrm\Unit;
 use Propel\Runtime\ActiveQuery\Criteria;
 
