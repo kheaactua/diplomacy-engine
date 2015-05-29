@@ -161,7 +161,7 @@ if (array_key_exists('m', $opts) && array_key_exists('T', $opts)) {
 	$str = '';
 	if (count($turns)) {
 		foreach ($turns as $turn) {
-			$str .= "$turn\n";
+			$str .= sprintf("%0.3d: %s\n", $turn->getPrimaryKey(), $turn);
 		}
 	} else {
 		$str .= "$match has no turns\n";
@@ -233,5 +233,50 @@ if (array_key_exists('m', $opts)) {
 }
 
 
+if (array_key_exists('t', $opts)) {
+	if (array_key_exists('t', $opts)) {
+		$turn = TurnQuery::create()->findPk($opts['t']);
+		if (!is_object($turn)) die("Invalid turn id");
+	}
+
+	$units = UnitQuery::create()
+		->filterByTurn($turn)
+		->useStateQuery()
+			->orderByOccupierId()
+		->endUse()
+		->find();
+	$str = '';
+	if (count($units)) {
+		$str .= "Units in $turn:\n";
+		$str .= str_pad('Empire', 12) .	str_pad('Unit', 7) .	 str_pad('Prev Territory', 30) . str_pad('Territory', 30) ."\n";
+		$str .= str_pad('', 11, '-') .' '. str_pad('', 6, '-') .' '. str_pad('', 29, '-') . ' '	. str_pad('', 29, '-')	."\n";
+		foreach ($units as $unit) {
+			$str .= str_pad($unit->getState()->getOccupier(), 12);
+			$str .= str_pad($unit->getUnitType(), 8);
+
+			if (is_object($unit->getState())) {
+				$currentTerritory = $unit->getState()->getTerritory()->__toString();
+			} else {
+				// Retreated..
+				$currentTerritory = '<stateless>';
+			}
+
+			if (is_object($unit->getLastState())) {
+				$lastTerritory = $unit->getLastState()->getTerritory()->__toString();
+			} else {
+				// Retreated..
+				$lastTerritory = '';
+			}
+			$str .= str_pad($lastTerritory, 29) . str_pad($currentTerritory, 30) . "\n";
+		}
+		$str .= "\n";
+	} else {
+		$str .= "$empire has no units in $turn\n";
+	}
+	print $str;
+	exit(0);
+}
+
+print "Parameters not matched.\n";
 
 // vim: ts=4 sts=0 sw=4 noexpandtab :
