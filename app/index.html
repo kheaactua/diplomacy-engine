@@ -1,100 +1,111 @@
 <!doctype html>
 <html ng-app="diplomacy">
-  <head>
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js"></script>
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" />
+<head>
+	<script type="text/javascript" src="bower_components/jquery/dist/jquery.js"></script>
+	<script type="text/javascript" src="bower_components/angularjs/angular.js"></script>
+	<link rel="stylesheet" type="text/css" href="bower_components/bootstrap/dist/css/bootstrap.css" />
 	<script type="text/javascript" src="app.js"></script>
-  </head>
-  <body>
-	<div class="col-md-6" ng-controller="MatchesController">
-		<div class='form-group'>
-			<label for='match'>All Matches</label>
-			<select class="form-control" ng-model="matchId" name="match" ng-change="setMatch(matchId)">
-            <option ng-repeat="(key, match) in matches track by $index" value="{{match.match_id}}">
-					{{match.name}}
-				</option>
-			</select>
-		</div>
+	<script type="text/javascript" src="scripts/factories/territories.js"></script>
+	<script type="text/javascript" src="script.js"></script>
+</head>
+<body ng-controller="MatchesController">
+	<div class="col-md-6">
+		<div>
+			<div class="form-group">
+				<label for="match">All Matches</label>
+				<select class="form-control" ng-model="matchId" name="match" id="match" ng-change="setMatch(matchId)">
+				<option ng-repeat="(key, match) in matches track by $index" value="{{match.match_id}}">
+						{{match.name}}
+					</option>
+				</select>
+			</div>
 
-		<div class="form-group">
-			<label for="empire">Empires in current match</label>
-			<select class="form-control" ng-model="empireId" name="empire" id="empire" ng-change="setEmpire(matchId, empireId);">
-				<option ng-repeat="empire in empires track by $index" value="{{empire.empire_id}}">
-					{{empire.name}}
-				</option>
-			</select>
+			<div class="form-group">
+				<label for="empire">Empires in current match</label>
+				<select class="form-control" ng-model="empireId" name="empire" id="empire" ng-change="setEmpire(matchId, empireId);">
+					<option ng-repeat="empire in empires track by $index" value="{{empire.empire_id}}">
+						{{empire.name}}
+					</option>
+				</select>
+			</div>
+			<!--{{territories}}-->
+			<ul class="list-unstyled">
+				<li ng-repeat="(tIdx, boardSquare) in territories track by $index"><!-- TODO Return the unit filter here -->
+					<form>
+						<h3>{{boardSquare.name}} | {{boardSquare.unit}}</h3>
+						<div class="form-group">
+							<label for="action">Action:</label>
+							<select class="form-control" ng-model="action" name="action" id="action">
+								<option value="hold">Hold</option>
+								<option value="move">Move or Attack</option>
+								<option value="support">Support</option>
+								<option ng-show="boardSquare.unit === 'fleet'" value="convoy">Convoy</option>
+							</select>
+						</div>
+						<div ng-show="action=='move'">
+							<div class="form-group">
+								<label for="move-destination">Move to:</label>
+								<select ng-model="destination[tIdx]" class="form-control" ng-change="writeMoveOrder(destination[tIdx])">
+									<option ng-repeat="neighbour in boardSquare.neighbours track by $index" value="{{neighbour.territoryId}}">
+										{{neighbour.name}}
+									</option>
+								</select>
+							</div>
+						</div>
+						<div ng-show="action=='support'">
+							<div class="form-group">
+								<label for="support-territory">Support troops in:</label>
+								<select ng-model="source[tIdx]" class="form-control">
+									<option ng-repeat="neighbour in boardSquare.neighbours track by $index" value="{{neighbour.territoryId}}">
+										{{neighbour.name}}
+									</option>
+								</select>
+							</div>
+							<div>
+								<label for="support-destination">Support them to:</label>
+								<select ng-model="destination" class="form-control" name="destination">
+									<option ng-repeat="neighbour in boardSquare.neighbours" value="{{neighbour.territoryId}}">
+										{{neighbour.name}}
+									</option>
+								</select>
+							</div>
+							<button ng-click="writeSupportOrder(source[tIdx], destination[tIdx])">Issue</button>
+						</div>
+						<div ng-show="action=='convoy'">
+							<div class="form-group">
+								<label for="convoy-source">Convoy from</label>
+								<select ng-model="source[tIdx]" class="form-control">
+									<option ng-repeat="neighbour in boardSquare.neighbours" value="{{neighbour.territoryId}}">
+										{{neighbour.name}}
+									</option>
+								</select>
+							</div>
+							<div class="form-group">
+								<label for="support-destination">Convoy to</label>
+								<select ng-model="destination[tIdx]" class="form-control">
+									<option ng-repeat="neighbour in boardSquare.neighbours" value="{{neighbour.territoryId}}">
+										{{neighbour.name}}
+									</option>
+								</select>
+							</div>
+							<button ng-click="writeConvoyOrder(source[tIdx], destination[tIdx])">Issue</button>
+						</div>
+						<div class="invisible">
+							<span id="command-text-{{$index}}">{{action}} {{boardSquare.territory.territoryId}} {{destination}} {{source}}</span>
+						</div>
+					</form>
+				</li>
+			</ul>
 		</div>
-		<!--{{territories}}-->
-		<ul class="list-unstyled">
-			<li ng-repeat="boardSquare in territories | filter : {unit: '!none'}">
-				<form>
-					<h3>{{boardSquare.territory.name}} | {{boardSquare.unit}}</h3>
-					<div class="form-group">
-						<label for="action">Action:</label>
-						<select class='form-control' ng-model='action' name='action' id='action'>
-							<option value='hold'>Hold</option>
-							<option value='move'>Move or Attack</option>
-							<option value='support'>Support</option>
-							<option ng-show='boardSquare.unit === "fleet"' value='convoy'>Convoy</option>
-						</select>
-					</div>
-					<div ng-show='action=="move"'>
-						<div class="form-group">
-							<label for="move-destination">Move to:</label>
-							<select ng-model="destination" class="form-control" name="destination" id="move-destination">
-								<option ng-repeat="territory in boardSquare.neighbours" value="{{territory.territory_id}}">
-									{{territory.name}}
-								</option>
-							</select>
-						</div>
-					</div>
-					<div ng-show="action=='support'">
-						<div class="form-group">
-							<label for="support-territory">Support troops in:</label>
-							<select ng-model="source" class="form-control" name="territory" id="support-territory">
-								<option ng-repeat="territory in boardSquare.neighbours" value="{{territory.territory_id}}">
-									{{territory.name}}
-								</option>
-							</select>
-						</div>
-						<div>
-							<label for="support-destination">Support them to:</label>
-							<select ng-model="destination" class="form-control" name="destination" id="support-destination">
-								<option ng-repeat="territory in boardSquare.neighbours" value="{{territory.territory_id}}">
-									{{territory.name}}
-								</option>
-							</select>
-						</div>
-					</div>
-					<div ng-show="action=='convoy'">
-						<div class="form-group">
-							<label for="convoy-source">Convoy from</label>
-							<select ng-model="source" class="form-control" name="source" id="convoy-source">
-								<option ng-repeat="territory in boardSquare.neighbours" value="{{territory.territory_id}}">
-									{{territory.name}}
-								</option>
-							</select>
-						</div>
-						<div class="form-group">
-							<label for="support-destination">Convoy to</label>
-							<select ng-model="destination" class="form-control" name="destination" id="support-destination">
-								<option ng-repeat="territory in boardSquare.neighbours" value="{{territory.territory_id}}">
-									{{territory.name}}
-								</option>
-							</select>
-						</div>
-					</div>
-					<blockquote ng-model="command" id="command-text-{{$index}}">
-						{{action}} {{boardSquare.territory.territory_id}} {{destination}} {{source}}
-					</blockquote>
-				</form>
-			</li>
-		</ul>
-		<input class="btn btn-primary" type="submit" ng-click="sendOrders(matchId, empireId, 'move 2 1')">
+		<input class="btn btn-primary" type="submit" ng-click="sendAllOrders()">
+		<blockquote id="last">
+			<ul>
+				<li ng-repeat="o in orders">{{o}}</li>
+			</ul>
+		</blockquote>
 	</div>
-  </body>
+</body>
 </html>
 
-<!-- vim: ts=3 sts=0 sw=3 expandtab :
+<!-- vim: ts=3 sts=0 sw=3 noexpandtab :
 -->

@@ -1,2 +1,4 @@
 composer.lock
 config/host.local.php
+vendor/
+app/bower_components/

@@ -1,26 +1,16 @@
 (function(){
 	var app = angular.module('diplomacy', []);
 
-	var server = 'http://diplomacy2.asilika.com:9494';
+	//var server = 'http://diplomacy3.asilika.com';
+	var server = 'http://diplomacy.asilika.com:9494';
 
-	app.controller('GamesController', ['$http', function($http){
+	app.controller('MatchesController', ['$http', '$scope', '$window', 'TerritoryController', 'Territory', function($http, $scope, $window, TerritoryController, territory){
 
-		this.games = "Hello, these are the games";
-		var gamesCtrl = this;
+		territoryController = TerritoryController.getTerritoryController();
 
-		$http.get( server + '/api/rest/games').success(function(response){
-		  gamesCtrl.games = response.data.data;
-		});
-	}]);
-
-	app.controller('MatchesController', ['$http', '$scope', '$window', function($http, $scope, $window){
+		$scope.territories = [];
 
 		$scope.action = 'hold';
-
-		$scope.matches = "Hello, these are the matches";
-
-		// Don't think you should do this
-		var matchesCtrl = this;
 
 		$http.get( server + '/api/rest/matches').success(function(response){
 			$scope.matches = response.data.data;
@@ -36,21 +26,61 @@
 		}
 
 		$scope.setEmpire = function(matchId, empireId){
-			this.selectedEmpire=$scope.empires[empireId];
+			$scope.selectedEmpire=$scope.empires[empireId];
 
 			//Get territories for this match
 			$http.get( server + '/api/rest/matches/'+matchId+'/empires/'+empireId+'/territories?include_neighbours=1').success(function(response){
-				$scope.territories = response.data.data;
+				angular.forEach(response.data.data, function (val, idx) {
+					var t = territoryController.push(val.territory);
+					$scope.territories.push(t);
+				});
+				angular.forEach(response.data.data, function (val, idx) {
+					var t = territoryController.get(val.territory.territoryId);
+					t.setUnit(val.unit);
+					t.loadNeighbours(val.neighbours);
+				});
 			});
 		}
 
-		$scope.sendOrders = function(matchId, empireId, ordersText){
+		/**
+		 * Iterates through all the orders in the form, and submits them one-by-one
+		 */
+		$scope.sendAllOrders = function() {
+			angular.forEach($scope.orders, function(val) {
+				sendOrder($scope.matchId, $scope.empireId, val);
+			});
+		}
+
+		sendOrder = function(matchId, empireId, order, orderText){
 			var req = server + '/api/rest/matches/'+matchId+'/empires/'+empireId+'/orders?order_str='+escape(ordersText);
-			console.debug(req);
 
 			$http.get(req).success(function(response){
 				console.debug(response);
 			});
+		}
+
+
+		/**
+		 * Here you can do what you like with orders.  You can send over
+		 * the current territory to help build the order (pass boardSquare to
+		 * these methods), you can build a string as I lazyly did here, you
+		 * can build a data structure for each other.. Total flexibility.
+		 * My code below is simply 'proof of concept'
+		 *
+		 * I'd suggest creating an index or something for these orders
+		 * such that you may create a delete button in the view of the orders,
+		 * or so that you can overwrite them by issuing a new one from the
+		 * same territory.
+		 */
+		$scope.orders = [];
+		$scope.writeMoveOrder = function(territoryId) {
+			$scope.orders.push('MOVE "' + territoryController.get(parseInt(territoryId)).name + '"');
+		}
+		$scope.writeSupportOrder = function(sourceId, destId) {
+			$scope.orders.push('SUPPORT ' + territoryController.get(parseInt(sourceId)).name + ' "' + + territoryController.get(parseInt(sourceId)).name + '"');
+		}
+		$scope.writeConvoyOrder = function(sourceId, destId) {
+			$scope.orders.push('CONVOY ' + territoryController.get(parseInt(sourceId)).name + ' "' + + territoryController.get(parseInt(sourceId)).name + '"');
 		}
 	}]);
 
@@ -59,7 +89,6 @@
 		  restrict: 'E',
 		  templateUrl: 'neighbour-territories.html'
 		};
-
 	});
 
 })();

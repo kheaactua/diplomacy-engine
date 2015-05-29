@@ -47,7 +47,7 @@ use Propel\Runtime\Propel;
 $con = Propel::getWriteConnection(DiplomacyOrm\Map\GameTableMap::DATABASE_NAME);
 //$sql = "DELETE FROM game WHERE name<>'test'";
 $queries = array('DELETE FROM game');
-$tables = array('match_state', 'turn', 'empire_order', 'empire', 'unit');
+$tables = array('game_match', 'match_state', 'turn', 'empire_order', 'empire', 'unit', 'territory_template');
 foreach ($tables as $t)
 	$queries[] = "ALTER TABLE $t AUTO_INCREMENT = 1";
 foreach ($queries as $q) {
@@ -99,6 +99,13 @@ foreach ($t_names as $n) {
 	$varname  = "t_".strtolower($n);
 	$$varname = StateQuery::create()->filterByTerritory($tt)->findOne();
 }
+
+print "$t_a neighbours:\n";
+$neighbours = $t_a->getTerritory()->getNeighbours();
+foreach ($neighbours as $n) {
+	print "$n\n";
+}
+
 
 print "\n" . Unit::printUnitTable($match->getCurrentTurn());
 
