@@ -29,7 +29,7 @@ class Unit {
 	public function setUnitType($v) {
 		$official_type = self::convert($v);
 		if ($official_type === false) {
-			throw new InvalidUnitException('Must specify unit type, "'. $type .'" provided.');
+			throw new InvalidUnitException('Must specify unit type, "'. $official_type .'" provided.');
 		}
 		$this->type = $official_type;
 	}
