@@ -381,6 +381,7 @@ print $retreat_results;
 			$str .= $map['tally'];
 			$str .= "\n";
 		}
+		print $str . "\n";
 	}
 
 	/**
@@ -704,6 +705,7 @@ class RetreatResolver {
 	}
 
 	public function addRequiredRetreat(TerritoryTemplate $terr, Empire $loser, Empire $winner) {
+print "Adding required retreat\n";
 		$this->required_retreats[] = array('territory' => $terr, 'winner' => $winner, 'loser' => $loser);
 	}
 

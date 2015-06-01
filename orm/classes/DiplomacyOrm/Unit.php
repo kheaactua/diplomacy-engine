@@ -28,6 +28,7 @@ class Unit {
 
 	public function setUnitType($v) {
 		$official_type = self::convert($v);
+$official_type='army';
 		if ($official_type === false) {
 			throw new InvalidUnitException('Must specify unit type, "'. $official_type .'" provided.');
 		}
